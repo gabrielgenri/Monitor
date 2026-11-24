@@ -11,6 +11,7 @@ permissions:
 jobs:
   crawl-and-update:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - name: Checkout repositorio
         uses: actions/checkout@v4
@@ -25,7 +26,13 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Ejecutar Crawler y Clasificador La Rioja
-        run: python scripts/fetch_and_classify.py
+        run: timeout -k 10 12m python scripts/fetch_and_classify.py
+
+      - name: Limpiar procesos huerfanos de Python/crawl
+        if: always()
+        run: |
+          pkill -9 -f "fetch_and_classify.py" || true
+          ps -ef | grep -E "python|fetch_and_classify" | grep -v grep || true
 
       - name: Commit y push de datos actualizados
         run: |
