@@ -1,10 +1,11 @@
 name: MonitorV2 Crawl y RSS La Rioja (3x al dia)
+
 on:
   schedule:
     - cron: "0 11,16,22 * * *"
-
   workflow_dispatch:
-  env:
+
+env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
 
 permissions:
@@ -14,9 +15,13 @@ jobs:
   crawl-and-update:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+
     steps:
-		- uses: actions/checkout@v4
-   		- uses: actions/setup-python@v5
+      - name: Descargar repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
         with:
           python-version: "3.11"
           cache: "pip"
@@ -27,7 +32,7 @@ jobs:
       - name: Ejecutar MonitorV2 Recolector La Rioja
         run: timeout -k 10 12m python scripts/monitor_v2_recolector.py
 
-      - name: Limpiar procesos huerfanos de Python/crawl
+      - name: Limpiar procesos huérfanos de Python/crawl
         if: always()
         run: |
           pkill -9 -f "monitor_v2_recolector.py" || true
