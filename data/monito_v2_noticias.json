@@ -1,0 +1,66 @@
+{
+"ultima_actualizacion": "2026-11-24T17:05:00-03:00",
+"jurisdiccion": "La Rioja, Argentina",
+"total_sitios_activos": 53,
+"total_notas": 1,
+"historial_corridas": [
+{
+"fecha": "2026-11-24T17:05:00-03:00",
+"sitios_procesados": 53,
+"notas_totales": 1,
+"notas_nuevas": 1,
+"adjuntos_detectados": 0
+}
+],
+"contenidos_vinculados": [
+{
+"id": "v2-vinc-01",
+"taxonomia": "Política y Gestión",
+"fecha_generacion": "2026-11-24T17:05:00-03:00",
+"titulo_original": "Informe Vinculado · Política y Gestión (La Rioja)",
+"copete": "Síntesis inicial consolidada de fuentes oficiales y medios de La Rioja.",
+"cuerpo_original": "Panorama consolidado de la jurisdicción La Rioja en Política y Gestión.",
+"etiquetas_vinculadas": [
+"gestión",
+"gobierno",
+"larioja"
+],
+"fuentes_cruzadas": [
+{
+"id_nota": "v2-demo-01",
+"titulo": "Portal Oficial del Gobierno de La Rioja",
+"fuente": "Portal Oficial Gobierno de La Rioja",
+"categoria": "Entidades de Gobierno",
+"enlace": "https://larioja.gob.ar/",
+"tipo_recurso": "HTML"
+}
+]
+}
+],
+"notas": [
+{
+"id": "v2-demo-01",
+"titulo": "Portal Oficial del Gobierno de La Rioja",
+"copete": "Canal institucional de la Provincia de La Rioja, Argentina.",
+"cuerpo": "Información oficial, normativas y servicios de la Provincia de La Rioja.",
+"imagen": "",
+"enlace": "https://larioja.gob.ar/",
+"fuente_id": "lr-gob-01",
+"fuente": "Portal Oficial Gobierno de La Rioja",
+"categoria": "Entidades de Gobierno",
+"subtipo": "Poder Ejecutivo Provincial",
+"localidad": "La Rioja Capital",
+"origen_extraccion": "Crawl Web",
+"tipo_recurso": "HTML",
+"taxonomia": "Política y Gestión",
+"etiquetas": [
+"gestión",
+"gobierno",
+"provincia"
+],
+"adjuntos": [],
+"fecha_publicacion": "2026-11-24T17:05:00-03:00",
+"fecha_recoleccion": "2026-11-24T17:05:00-03:00"
+}
+]
+}
