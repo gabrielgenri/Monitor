@@ -13,10 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - name: Instalo Node
-	    uses: actions/setup-node@v7
-		with:
-		   node-version: "24"
+     
 	  - name: Checkout repositorio
         uses: actions/checkout@v6
       - name: Configurar Python 3.11
