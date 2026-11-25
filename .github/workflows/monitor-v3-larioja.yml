@@ -47,4 +47,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add data/monitor_v3_noticias.json data/monitor_v3_fuentes.json
-          git diff --staged --quiet || git commit -m "chore(monitor-v3.2): actualizar noti
+          git diff --staged --quiet || git commit -m "chore(monitor-v3.2): actualizar noticias, imagenes y vinculos La Rioja ($(date -u +'%Y-%m-%d %H:%M UTC'))"
+          git push
