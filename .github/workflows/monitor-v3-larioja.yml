@@ -60,15 +60,7 @@ jobs:
             git commit -m "chore(monitor): actualizar noticias y estado de fuentes ($(date -u +'%Y-%m-%d %H:%M UTC'))"
             git push
           fi
-```[cite: 1, 4]
 
-### `requirements.txt`
-```text
-feedparser>=6.0.11
-requests>=2.32.0
-beautifulsoup4>=4.12.3
-urllib3>=2.2.0
-```[cite: 3, 7]
 
 ### `scripts/monitor_v3_recolector.py`
 ```python
