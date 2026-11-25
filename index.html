@@ -335,7 +335,7 @@
     <div class="topbar">
       <div class="brand">
         <h1>MonitorV3.2</h1>
-        <p class="subtitle" id="subtituloEstado">Cargando catálogo y noticias...</p>
+        <p class="subtitle" id="subtituloEstado">Cargando noticias...</p>
       </div>
       <div style="display:flex; gap:8px;">
         <button class="btn" id="btnRecargar" type="button">Actualizar</button>
@@ -615,7 +615,7 @@
 
       const act = state.noticiasData.actualizado_local || state.fuentesConfig.actualizado || "Sin fecha";
       document.getElementById("subtituloEstado").textContent =
-        `Provincia de La Rioja, Argentina · ${activas.length} fuentes activas · ${notas.length} notas · Act: ${act}`;
+        `${activas.length} fuentes activas · ${notas.length} notas · Act: ${act}`;
     }
 
     function renderFiltrosTaxonomia() {
