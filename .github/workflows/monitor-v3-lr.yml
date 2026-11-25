@@ -1,0 +1,53 @@
+name: MonitorV3.1 Crawl y RSS La Rioja (Node 24 / 3x al dia)
+
+env:
+FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+TZ: "America/Argentina/La_Rioja"
+PYTHONUNBUFFERED: "1"
+
+on:
+schedule:
+# 08:00, 13:00 y 19:00 hora de Argentina (UTC-3)
+- cron: "0 11,16,22 * * *"
+workflow_dispatch:
+
+concurrency:
+group: monitor-v3-1-larioja-${{ github.ref }}
+cancel-in-progress: false
+
+permissions:
+contents: write
+
+jobs:
+crawl-and-update:
+runs-on: ubuntu-latest
+timeout-minutes: 15
+steps:
+- name: Checkout repositorio
+uses: actions/checkout@v4
+
+  - name: Configurar Python 3.12
+    uses: actions/setup-python@v5
+    with:
+      python-version: "3.12"
+      cache: "pip"
+
+  - name: Instalar dependencias
+    run: python -m pip install --upgrade pip && pip install -r requirements.txt
+
+  - name: Ejecutar MonitorV3.1 Recolector La Rioja
+    run: timeout -k 10 12m python scripts/monitor_v3_recolector.py
+
+  - name: Limpiar procesos huerfanos de Python/crawl
+    if: always()
+    run: |
+      pkill -9 -f "monitor_v3_recolector.py" || true
+      ps -ef | grep -E "python|monitor_v3_recolector" | grep -v grep || true
+
+  - name: Commit y push de datos actualizados
+    run: |
+      git config user.name "github-actions[bot]"
+      git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+      git add data/monitor_v3_noticias.json data/monitor_v3_fuentes.json
+      git diff --staged --quiet || git commit -m "chore(monitor-v3.1): actualizar noticias, imagenes y vinculos La Rioja ($(date -u +'%Y-%m-%d %H:%M UTC'))"
+      git push
