@@ -11,10 +11,6 @@ schedule:
 - cron: "0 11,16,22 * * *"
 workflow_dispatch:
 
-concurrency:
-group: monitor-v3-1-larioja-${{ github.ref }}
-cancel-in-progress: false
-
 permissions:
 contents: write
 
