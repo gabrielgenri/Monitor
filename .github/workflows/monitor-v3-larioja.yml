@@ -1,25 +1,26 @@
-name: MonitorV3.2 Crawl y RSS La Rioja (Node 24 / 3x al dia)
+name: MonitorV3 Crawl y RSS La Rioja (3x al dia)
+
+on:
+  schedule:
+    - cron: "0 11,16,22 * * *"
+  workflow_dispatch: {}
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
   TZ: "America/Argentina/La_Rioja"
 
-on:
-  schedule:
-    - cron: "0 11,16,22 * * *"
-  workflow_dispatch:
-
 concurrency:
-  group: monitor-v3-2-larioja-${{ github.ref }}
-  cancel-in-progress: false
+  group: monitor-v3-larioja-crawl
+  cancel-in-progress: true
 
 permissions:
   contents: write
 
 jobs:
-  crawl-and-update:
+  crawl-and-publish:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+
     steps:
       - name: Checkout repositorio
         uses: actions/checkout@v4
@@ -31,21 +32,1090 @@ jobs:
           cache: "pip"
 
       - name: Instalar dependencias
-        run: pip install -r requirements.txt
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
 
-      - name: Ejecutar MonitorV3.2 Recolector La Rioja
-        run: timeout -k 10 12m python scripts/monitor_v3_recolector.py
+      - name: Ejecutar recolector con control de tiempo
+        run: |
+          timeout -k 10 12m python scripts/monitor_v3_recolector.py
 
-      - name: Limpiar procesos huerfanos de Python/crawl
+      - name: Limpiar procesos residuales
         if: always()
         run: |
           pkill -9 -f "monitor_v3_recolector.py" || true
-          ps -ef | grep -E "python|monitor_v3_recolector" | grep -v grep || true
 
-      - name: Commit y push de datos actualizados
+      - name: Publicar cambios en data/
         run: |
+          if [ ! -s data/monitor_v3_noticias.json ]; then
+            echo "Advertencia: data/monitor_v3_noticias.json vacío; se omite commit."
+            exit 0
+          fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add data/monitor_v3_noticias.json data/monitor_v3_fuentes.json
-          git diff --staged --quiet || git commit -m "chore(monitor-v3.2): actualizar noticias, imagenes y vinculos La Rioja ($(date -u +'%Y-%m-%d %H:%M UTC'))"
-          git push
+          if git diff --staged --quiet; then
+            echo "Sin cambios en data/"
+          else
+            git commit -m "chore(monitor): actualizar noticias y estado de fuentes ($(date -u +'%Y-%m-%d %H:%M UTC'))"
+            git push
+          fi
+```[cite: 1, 4]
+
+### `requirements.txt`
+```text
+feedparser>=6.0.11
+requests>=2.32.0
+beautifulsoup4>=4.12.3
+urllib3>=2.2.0
+```[cite: 3, 7]
+
+### `scripts/monitor_v3_recolector.py`
+```python
+from __future__ import annotations
+
+import hashlib
+import json
+import os
+import re
+from collections import defaultdict
+from datetime import datetime, timezone
+from urllib.parse import parse_qsl, urlencode, urljoin, urlparse, urlunparse
+from zoneinfo import ZoneInfo
+
+import feedparser
+import requests
+import urllib3
+from bs4 import BeautifulSoup
+
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
+FUENTES_PATH = "data/monitor_v3_fuentes.json"
+NOTICIAS_PATH = "data/monitor_v3_noticias.json"
+USER_AGENT = (
+    "Mozilla/5.0 (compatible; MonitorLaRioja/3.2; +https://gabrielgenri.github.io/Monitor/)"
+)
+TRACKING_PARAMS = {
+    "utm_source",
+    "utm_medium",
+    "utm_campaign",
+    "utm_term",
+    "utm_content",
+    "fbclid",
+    "gclid",
+    "igshid",
+}
+CATEGORIA_NORMALIZADA = {
+    "Instituciones Gubernamentales": "Entidades de Gobierno",
+    "Entidades de Gobierno": "Entidades de Gobierno",
+}
+
+
+def normalizar_url(url: str) -> str:
+    if not url:
+        return ""
+    try:
+        parsed = urlparse(url.strip())
+        if not parsed.scheme or not parsed.netloc:
+            return url.strip()
+        filtrados = [
+            (k, v)
+            for k, v in parse_qsl(parsed.query, keep_blank_values=True)
+            if k.lower() not in TRACKING_PARAMS
+        ]
+        query_limpia = urlencode(filtrados)
+        path_limpio = re.sub(r"/{2,}", "/", parsed.path or "/")
+        return urlunparse(
+            (
+                parsed.scheme.lower(),
+                parsed.netloc.lower(),
+                path_limpio,
+                parsed.params,
+                query_limpia,
+                "",
+            )
+        )
+    except Exception:
+        return url.strip()
+
+
+def normalizar_categoria(cat: str) -> str:
+    limpia = (cat or "").strip()
+    return CATEGORIA_NORMALIZADA.get(limpia, limpia or "Medios de Comunicación")
+
+
+def limpiar_texto(texto: str) -> str:
+    return re.sub(r"\s+", " ", (texto or "")).strip()
+
+
+def detectar_archivos(soup: BeautifulSoup, base_url: str, extensiones: list[str]) -> list[dict]:
+    exts = {e.lower().lstrip(".") for e in extensiones if e.lower().lstrip(".") not in {"html", "rss", "xml"}}
+    hallados = []
+    vistos = set()
+    for a in soup.find_all("a", href=True):
+        href_abs = normalizar_url(urljoin(base_url, a["href"]))
+        if not href_abs or href_abs in vistos:
+            continue
+        ext = urlparse(href_abs).path.rsplit(".", 1)[-1].lower() if "." in urlparse(href_abs).path else ""
+        if ext in exts:
+            vistos.add(href_abs)
+            hallados.append(
+                {
+                    "url": href_abs,
+                    "extension": ext,
+                    "texto": limpiar_texto(a.get_text(" ", strip=True))[:140] or f"Archivo .{ext}",
+                }
+            )
+    return hallados
+
+
+def extraer_imagen(soup: BeautifulSoup | None, entry: dict | None, base_url: str) -> str:
+    if entry:
+        for campo in ("media_content", "media_thumbnail"):
+            items = entry.get(campo) or []
+            if isinstance(items, list) and items and items[0].get("url"):
+                return normalizar_url(urljoin(base_url, items[0]["url"]))
+        for enc in entry.get("enclosures") or []:
+            href = enc.get("href") or enc.get("url")
+            tipo = (enc.get("type") or "").lower()
+            if href and ("image" in tipo or re.search(r"\.(jpe?g|png|webp|gif)(\?|$)", href, re.I)):
+                return normalizar_url(urljoin(base_url, href))
+    if soup:
+        og = soup.find("meta", property="og:image") or soup.find("meta", attrs={"name": "twitter:image"})
+        if og and og.get("content"):
+            return normalizar_url(urljoin(base_url, og["content"]))
+        for img in soup.find_all("img", src=True):
+            src = img["src"].strip()
+            if src and not src.startswith("data:image"):
+                return normalizar_url(urljoin(base_url, src))
+    return ""
+
+
+def extraer_cuerpo_html(html_text: str) -> tuple[str, str, BeautifulSoup]:
+    soup = BeautifulSoup(html_text, "html.parser")
+    for tag in soup(["script", "style", "noscript", "nav", "footer", "header", "aside", "form"]):
+        tag.decompose()
+
+    meta_desc = soup.find("meta", attrs={"name": "description"}) or soup.find("meta", property="og:description")
+    copete = limpiar_texto(meta_desc["content"]) if meta_desc and meta_desc.get("content") else ""
+
+    contenedor = soup.find("article") or soup.find("main") or soup.body or soup
+    parrafos = [
+        limpiar_texto(p.get_text(" ", strip=True))
+        for p in contenedor.find_all("p")
+        if len(limpiar_texto(p.get_text(" ", strip=True))) >= 35
+    ]
+    cuerpo = "\n\n".join(parrafos)
+    if not cuerpo:
+        cuerpo = limpiar_texto(contenedor.get_text(" ", strip=True))
+    if not copete and cuerpo:
+        copete = cuerpo[:240].rsplit(" ", 1)[0] + ("..." if len(cuerpo) > 240 else "")
+    return copete, cuerpo, soup
+
+
+def fetch_html(url: str, timeout: int = 15) -> tuple[str | None, int | None, str]:
+    try:
+        resp = requests.get(
+            url,
+            headers={"User-Agent": USER_AGENT},
+            timeout=timeout,
+            verify=False,
+        )
+        if resp.status_code >= 400:
+            return None, resp.status_code, f"HTTP {resp.status_code}"
+        resp.encoding = resp.apparent_encoding or resp.encoding or "utf-8"
+        return resp.text, resp.status_code, "ok"
+    except requests.Timeout:
+        return None, None, "timeout"
+    except Exception as exc:
+        return None, None, f"error: {type(exc).__name__}"
+
+
+def clasificar_nota(
+    titulo: str,
+    copete: str,
+    cuerpo: str,
+    taxonomias: list[str],
+    reglas: dict[str, list[str]],
+    tema_por_defecto: str,
+) -> tuple[str, list[str]]:
+    texto_busqueda = f"{titulo} {copete} {cuerpo[:1500]}".lower()
+    puntajes: dict[str, int] = {}
+    etiquetas_halladas: list[str] = []
+
+    for tax in taxonomias:
+        palabras = reglas.get(tax, [])
+        hits = [kw for kw in palabras if re.search(r"\b" + re.escape(kw.lower()) + r"\b", texto_busqueda)]
+        if hits:
+            puntajes[tax] = len(hits)
+            etiquetas_halladas.extend(hits[:3])
+
+    if puntajes:
+        mejor_tax = max(puntajes.items(), key=lambda item: item[1])[0]
+    elif tema_por_defecto and tema_por_defecto in taxonomias:
+        mejor_tax = tema_por_defecto
+    else:
+        mejor_tax = taxonomias[0] if taxonomias else "Política y Gestión"
+
+    etiquetas_unicas = list(dict.fromkeys([mejor_tax] + etiquetas_halladas))[:6]
+    return mejor_tax, etiquetas_unicas
+
+
+def construir_contenidos_vinculados(notas: list[dict], taxonomias: list[str]) -> list[dict]:
+    por_tax: dict[str, list[dict]] = defaultdict(list)
+    for nota in notas:
+        por_tax[nota["taxonomia"]].append(nota)
+
+    vinculados = []
+    for tax in taxonomias:
+        grupo = por_tax.get(tax, [])
+        fuentes_distintas = {n["fuente_id"]: n for n in grupo}
+        if len(fuentes_distintas) >= 2:
+            seleccionadas = list(fuentes_distintas.values())[:4]
+            nombres_fuentes = ", ".join(n["fuente_nombre"] for n in seleccionadas)
+            titulos_ref = " | ".join(n["titulo"] for n in seleccionadas[:3])
+            vinculados.append(
+                {
+                    "id": f"vinculo-{hashlib.sha1(tax.encode('utf-8')).hexdigest()[:10]}",
+                    "taxonomia": tax,
+                    "titulo_original": f"Cruce informativo ({tax}): {seleccionadas[0]['titulo'][:95]}",
+                    "copete": (
+                        f"Síntesis de {len(seleccionadas)} fuentes de La Rioja ({nombres_fuentes}) "
+                        f"sobre {tax.lower()}."
+                    ),
+                    "cuerpo_original": (
+                        f"En el eje {tax}, se registran coincidencias temáticas entre {nombres_fuentes}. "
+                        f"Entre los reportes consolidados destacan: {titulos_ref}."
+                    ),
+                    "fuentes_participantes": [n["fuente_nombre"] for n in seleccionadas],
+                    "enlaces_referencia": [n["enlace"] for n in seleccionadas],
+                }
+            )
+    return vinculados
+
+
+def main() -> None:
+    os.makedirs("data", exist_ok=True)
+    with open(FUENTES_PATH, "r", encoding="utf-8") as f:
+        catalogo = json.load(f)
+
+    zona = ZoneInfo(catalogo.get("zona_horaria", "America/Argentina/La_Rioja"))
+    ahora_local = datetime.now(zona)
+    ahora_utc = datetime.now(timezone.utc).isoformat()
+    taxonomias = catalogo.get("taxonomias", [])
+    reglas = catalogo.get("reglas_clasificacion", {})
+    extensiones = catalogo.get("extensiones_objetivo", [])
+
+    sitios_normalizados = []
+    for sitio in catalogo.get("sitios", []):
+        copia = dict(sitio)
+        copia["categoria"] = normalizar_categoria(copia.get("categoria", ""))
+        copia["tema_por_defecto"] = ""
+        sitios_normalizados.append(copia)
+
+    catalogo["sitios"] = sitios_normalizados
+    catalogo["actualizado"] = ahora_local.strftime("%Y-%m-%d")
+
+    notas_consolidadas: list[dict] = []
+    archivos_detectados: list[dict] = []
+    estado_fuentes: list[dict] = []
+    urls_vistas: set[str] = set()
+    hashes_vistos: set[str] = set()
+
+    for sitio in sitios_normalizados:
+        if not sitio.get("activo", True):
+            continue
+
+        fuente_id = sitio.get("id", "")
+        fuente_nombre = sitio.get("nombre", fuente_id)
+        url_web = normalizar_url(sitio.get("url_web", ""))
+        url_rss = normalizar_url(sitio.get("url_rss", ""))
+        usar_rss = bool(sitio.get("usar_rss") and url_rss)
+
+        recolectadas_fuente = 0
+        estado_detalle = "sin_datos"
+        http_code = None
+
+        if usar_rss:
+            xml_txt, http_code, estado_detalle = fetch_html(url_rss, timeout=15)
+            if xml_txt:
+                feed = feedparser.parse(xml_txt)
+                for entry in feed.entries[:12]:
+                    titulo = limpiar_texto(entry.get("title", ""))
+                    enlace = normalizar_url(urljoin(url_rss, entry.get("link", "") or url_web))
+                    if not titulo or not enlace or enlace in urls_vistas:
+                        continue
+
+                    resumen_feed = limpiar_texto(
+                        BeautifulSoup(entry.get("summary", "") or entry.get("description", ""), "html.parser").get_text(
+                            " ", strip=True
+                        )
+                    )
+                    copete, cuerpo, soup_nota = "", "", None
+                    html_nota, _, _ = fetch_html(enlace, timeout=12)
+                    if html_nota:
+                        copete, cuerpo, soup_nota = extraer_cuerpo_html(html_nota)
+                        hallados_arch = detectar_archivos(soup_nota, enlace, extensiones)
+                        for arc in hallados_arch:
+                            arc["fuente"] = fuente_nombre
+                            archivos_detectados.append(arc)
+
+                    if not cuerpo:
+                        cuerpo = resumen_feed or titulo
+                    if not copete:
+                        copete = resumen_feed or cuerpo[:200]
+
+                    huella = hashlib.sha256(f"{titulo.lower()}|{cuerpo[:300].lower()}".encode("utf-8")).hexdigest()[:16]
+                    if huella in hashes_vistos:
+                        continue
+
+                    urls_vistas.add(enlace)
+                    hashes_vistos.add(huella)
+
+                    imagen = extraer_imagen(soup_nota, entry, enlace)
+                    tax, etiquetas = clasificar_nota(
+                        titulo, copete, cuerpo, taxonomias, reglas, sitio.get("tema_por_defecto", "")
+                    )
+                    nota_id = hashlib.sha1(f"{fuente_id}|{enlace}".encode("utf-8")).hexdigest()[:12]
+
+                    notas_consolidadas.append(
+                        {
+                            "id": nota_id,
+                            "titulo": titulo,
+                            "copete": copete,
+                            "cuerpo": cuerpo,
+                            "imagen": imagen,
+                            "enlace": enlace,
+                            "fuente_id": fuente_id,
+                            "fuente_nombre": fuente_nombre,
+                            "categoria": sitio.get("categoria", ""),
+                            "localidad": sitio.get("localidad", ""),
+                            "taxonomia": tax,
+                            "etiquetas": etiquetas,
+                            "fecha_recoleccion": ahora_local.isoformat(),
+                            "canal": "rss+crawl",
+                        }
+                    )
+                    recolectadas_fuente += 1
+
+        if recolectadas_fuente == 0 and url_web:
+            html_web, http_code, estado_detalle = fetch_html(url_web, timeout=15)
+            if html_web:
+                _, cuerpo_web, soup_web = extraer_cuerpo_html(html_web)
+                hallados_arch = detectar_archivos(soup_web, url_web, extensiones)
+                for arc in hallados_arch:
+                    arc["fuente"] = fuente_nombre
+                    archivos_detectados.append(arc)
+
+                candidatos = []
+                for a in soup_web.find_all("a", href=True):
+                    t_link = limpiar_texto(a.get_text(" ", strip=True))
+                    h_link = normalizar_url(urljoin(url_web, a["href"]))
+                    if len(t_link) >= 28 and h_link.startswith("http") and h_link not in urls_vistas:
+                        candidatos.append((t_link, h_link))
+
+                for titulo, enlace in candidatos[:6]:
+                    copete_n, cuerpo_n, soup_n = "", "", None
+                    html_n, _, _ = fetch_html(enlace, timeout=12)
+                    if html_n:
+                        copete_n, cuerpo_n, soup_n = extraer_cuerpo_html(html_n)
+                        arch_n = detectar_archivos(soup_n, enlace, extensiones)
+                        for arc in arch_n:
+                            arc["fuente"] = fuente_nombre
+                            archivos_detectados.append(arc)
+
+                    if not cuerpo_n:
+                        cuerpo_n = cuerpo_web[:800] or titulo
+                    if not copete_n:
+                        copete_n = cuerpo_n[:220]
+
+                    huella = hashlib.sha256(f"{titulo.lower()}|{cuerpo_n[:300].lower()}".encode("utf-8")).hexdigest()[:16]
+                    if huella in hashes_vistos:
+                        continue
+
+                    urls_vistas.add(enlace)
+                    hashes_vistos.add(huella)
+
+                    imagen = extraer_imagen(soup_n, None, enlace)
+                    tax, etiquetas = clasificar_nota(
+                        titulo, copete_n, cuerpo_n, taxonomias, reglas, sitio.get("tema_por_defecto", "")
+                    )
+                    nota_id = hashlib.sha1(f"{fuente_id}|{enlace}".encode("utf-8")).hexdigest()[:12]
+
+                    notas_consolidadas.append(
+                        {
+                            "id": nota_id,
+                            "titulo": titulo,
+                            "copete": copete_n,
+                            "cuerpo": cuerpo_n,
+                            "imagen": imagen,
+                            "enlace": enlace,
+                            "fuente_id": fuente_id,
+                            "fuente_nombre": fuente_nombre,
+                            "categoria": sitio.get("categoria", ""),
+                            "localidad": sitio.get("localidad", ""),
+                            "taxonomia": tax,
+                            "etiquetas": etiquetas,
+                            "fecha_recoleccion": ahora_local.isoformat(),
+                            "canal": "crawl",
+                        }
+                    )
+                    recolectadas_fuente += 1
+
+        estado_fuentes.append(
+            {
+                "fuente_id": fuente_id,
+                "nombre": fuente_nombre,
+                "http_status": http_code,
+                "estado": estado_detalle,
+                "notas_recolectadas": recolectadas_fuente,
+                "ultima_ejecucion": ahora_local.isoformat(),
+            }
+        )
+
+    archivos_unicos = []
+    urls_arch_vistas = set()
+    for arc in archivos_detectados:
+        if arc["url"] not in urls_arch_vistas:
+            urls_arch_vistas.add(arc["url"])
+            archivos_unicos.append(arc)
+
+    contenidos_vinculados = construir_contenidos_vinculados(notas_consolidadas, taxonomias)
+
+    salida = {
+        "version": catalogo.get("version", "3.2.0-monitor-larioja"),
+        "actualizado_utc": ahora_utc,
+        "actualizado_local": ahora_local.isoformat(),
+        "jurisdiccion": catalogo.get("jurisdiccion", "Provincia de La Rioja, Argentina"),
+        "total_notas": len(notas_consolidadas),
+        "notas": notas_consolidadas,
+        "contenidos_vinculados": contenidos_vinculados,
+        "archivos_detectados": archivos_unicos,
+        "estado_fuentes": estado_fuentes,
+    }
+
+    with open(FUENTES_PATH, "w", encoding="utf-8") as f:
+        json.dump(catalogo, f, ensure_ascii=False, indent=2)
+
+    with open(NOTICIAS_PATH, "w", encoding="utf-8") as f:
+        json.dump(salida, f, ensure_ascii=False, indent=2)
+
+
+if __name__ == "__main__":
+    main()
+```[cite: 1, 2, 7]
+
+### `data/monitor_v3_fuentes.json` (esquema corregido y unificado)
+```json
+{
+  "version": "3.2.0-monitor-larioja",
+  "actualizado": "2026-11-25",
+  "jurisdiccion": "Provincia de La Rioja, Argentina",
+  "zona_horaria": "America/Argentina/La_Rioja",
+  "frecuencia_cron_utc": ["0 11,16,22 * * *"],
+  "extensiones_objetivo": [
+    "html", "rss", "xml", "csv", "pdf", "zip", "xls", "xlsx",
+    "dta", "dbf", "sav", "txt", "jpeg", "jpg", "rar", "docx",
+    "shp", "json", "doc", "ods", "shape", "xlsm"
+  ],
+  "taxonomias": [
+    "Política y Gestión",
+    "Economía, Finanzas y Producción",
+    "Ciencia, Tecnología y Educación",
+    "Sociedad, Salud y Justicia",
+    "Normativa y Datos Oficiales",
+    "Cultura y Deportes"
+  ],
+  "reglas_clasificacion": {
+    "Política y Gestión": [
+      "gobernador", "quintela", "gabinete", "legislatura", "diputados",
+      "municipio", "intendente", "gestión", "gobierno", "ministerio",
+      "secretaría", "elecciones", "política", "reforma", "constitución",
+      "pacto", "federal"
+    ],
+    "Economía, Finanzas y Producción": [
+      "economía", "presupuesto", "impuestos", "rentas", "producción",
+      "agro", "olivo", "vid", "vino", "minería", "litio", "parque eólico",
+      "energía", "industria", "parque industrial", "comercio", "empleo",
+      "salario", "bono", "chachos", "bocade", "banco rioja", "inversión",
+      "turismo", "exportación", "pbi"
+    ],
+    "Ciencia, Tecnología y Educación": [
+      "unlar", "utn", "conicet", "crilar", "inta", "inti", "ciencia",
+      "tecnología", "investigación", "universidad", "educación", "escuela",
+      "docentes", "becas", "innovación", "software", "polo tecnológico",
+      "internet", "conectividad", "paper", "tesis"
+    ],
+    "Sociedad, Salud y Justicia": [
+      "salud", "hospital", "vera barros", "madre y el niño", "dengue",
+      "vacunación", "justicia", "tribunal", "fiscalía", "juez", "seguridad",
+      "policía", "vivienda", "agua", "ipalar", "edelap", "edelar",
+      "transporte", "rioja bus", "desarrollo social", "vecinos"
+    ],
+    "Normativa y Datos Oficiales": [
+      "boletín oficial", "ley", "decreto", "resolución", "ordenanza",
+      "licitación", "datos abiertos", "estadística", "censo", "indec",
+      "digesto", "acordada", "expediente", "pliego", "archivo", "dataset",
+      "shapefile", "cartografía", "catastro"
+    ],
+    "Cultura y Deportes": [
+      "cultura", "chaya", "festival", "música", "teatro", "feria del libro",
+      "patrimonio", "talampaya", "museo", "artesanía", "deporte", "fútbol",
+      "básquet", "riachuelo", "andino", "tesorieri", "amancay", "torneo",
+      "superdomo", "autódromo"
+    ]
+  },
+  "sitios": [
+    {
+      "id": "lr-medios-01",
+      "nombre": "El Independiente Digital",
+      "categoria": "Medios de Comunicación",
+      "subtipo": "Diario Provincial",
+      "localidad": "La Rioja Capital",
+      "url_web": "https://www.elindependiente.com.ar/",
+      "url_rss": "https://www.elindependiente.com.ar/feed/",
+      "usar_rss": true,
+      "crawl_profundidad": 3,
+      "tema_por_defecto": "",
+      "activo": true
+    },
+    {
+      "id": "lr-medios-02",
+      "nombre": "Nueva Rioja",
+      "categoria": "Medios de Comunicación",
+      "subtipo": "Diario Provincial",
+      "localidad": "La Rioja Capital",
+      "url_web": "https://www.nuevarioja.com.ar/",
+      "url_rss": "https://www.nuevarioja.com.ar/rss/feed.xml",
+      "usar_rss": true,
+      "crawl_profundidad": 3,
+      "tema_por_defecto": "",
+      "activo": true
+    },
+    {
+      "id": "lr-medios-03",
+      "nombre": "Medios Provincia (Radio y TV)",
+      "categoria": "Medios de Comunicación",
+      "subtipo": "Multimedio Provincial",
+      "localidad": "La Rioja Capital",
+      "url_web": "https://mediosprovincia.com.ar/",
+      "url_rss": "https://mediosprovincia.com.ar/feed/",
+      "usar_rss": true,
+      "crawl_profundidad": 3,
+      "tema_por_defecto": "",
+      "activo": true
+    },
+    {
+      "id": "lr-medios-04",
+      "nombre": "Radio Fénix 95.1",
+      "categoria": "Medios de Comunicación",
+      "subtipo": "Radio y Portal",
+      "localidad": "La Rioja Capital",
+      "url_web": "https://www.fenix951.com.ar/",
+      "url_rss": "",
+      "usar_rss": false,
+      "crawl_profundidad": 3,
+      "tema_por_defecto": "",
+      "activo": true
+    },
+    {
+      "id": "lr-gob-18",
+      "nombre": "EUCOP La Rioja",
+      "categoria": "Entidades de Gobierno",
+      "subtipo": "Ente Regulador Servicios Públicos",
+      "localidad": "La Rioja Capital",
+      "url_web": "https://eucop.larioja.gob.ar/",
+      "url_rss": "",
+      "usar_rss": false,
+      "crawl_profundidad": 3,
+      "tema_por_defecto": "",
+      "activo": true
+    },
+    {
+      "id": "lr-gob-19",
+      "nombre": "Banco Rioja (SAU)",
+      "categoria": "Entidades de Gobierno",
+      "subtipo": "Banca Pública Provincial",
+      "localidad": "La Rioja Capital",
+      "url_web": "https://bancorioja.com.ar/",
+      "url_rss": "",
+      "usar_rss": false,
+      "crawl_profundidad": 3,
+      "tema_por_defecto": "",
+      "activo": true
+    },
+    {
+      "id": "lr-gob-20",
+      "nombre": "Parque Eólico Arauco SAPEM",
+      "categoria": "Entidades de Gobierno",
+      "subtipo": "Empresa Estatal Energética",
+      "localidad": "Arauco / La Rioja",
+      "url_web": "https://parqueeolicoarauco.com.ar/",
+      "url_rss": "",
+      "usar_rss": false,
+      "crawl_profundidad": 3,
+      "tema_por_defecto": "",
+      "activo": true
+    }
+  ]
+}
+```[cite: 1, 2, 9]
+
+### `index.html` (SPA minimalista conectada a `data/monitor_v3_fuentes.json` y `data/monitor_v3_noticias.json`)
+```html
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MonitorV3.2 · RSS &amp; Crawl La Rioja</title>
+  <style>
+    :root {
+      --bg: #f6f7f9;
+      --card: #ffffff;
+      --text: #14181f;
+      --muted: #5c6675;
+      --line: #e2e6ed;
+      --accent: #1f4e78;
+      --accent-soft: #eef4fa;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+    header.sticky-top {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background: var(--card);
+      border-bottom: 1px solid var(--line);
+      padding: 10px 14px 0;
+    }
+    .top-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .brand h1 { margin: 0; font-size: 16px; }
+    .brand small { color: var(--muted); font-size: 12px; }
+    .actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    input[type="search"], input[type="text"], select {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 7px 10px;
+      font-size: 13px;
+      background: #fff;
+      color: var(--text);
+    }
+    button {
+      border: 1px solid var(--line);
+      background: var(--card);
+      color: var(--text);
+      border-radius: 8px;
+      padding: 7px 11px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    button.primary {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+    nav.tabs {
+      display: flex;
+      gap: 4px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    nav.tabs button {
+      border: none;
+      border-bottom: 2px solid transparent;
+      border-radius: 0;
+      white-space: nowrap;
+      padding: 9px 10px;
+      color: var(--muted);
+    }
+    nav.tabs button.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+      font-weight: 600;
+    }
+    main { max-width: 1120px; margin: 14px auto; padding: 0 14px 36px; }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(145px, 1fr));
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .stat {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 10px 12px;
+    }
+    .stat b { display: block; font-size: 18px; }
+    .stat span { font-size: 12px; color: var(--muted); }
+    .pills { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+    .pill {
+      padding: 5px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: var(--card);
+      font-size: 12px;
+      cursor: pointer;
+    }
+    .pill.active { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); font-weight: 600; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 12px; }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .card img { width: 100%; height: 150px; object-fit: cover; border-radius: 8px; }
+    .card h3 { margin: 0; font-size: 15px; line-height: 1.3; }
+    .meta { font-size: 12px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 6px; }
+    .link-btn { color: var(--accent); text-decoration: underline; background: none; border: none; padding: 0; font-size: 12px; }
+    .card-actions { display: flex; gap: 6px; flex-wrap: wrap; margin-top: auto; }
+    .empty { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 20px; text-align: center; color: var(--muted); }
+    dialog {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      max-width: 680px;
+      width: calc(100% - 24px);
+      padding: 16px;
+    }
+    .crud-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 8px; margin-bottom: 12px; }
+  </style>
+</head>
+<body>
+  <header class="sticky-top">
+    <div class="top-bar">
+      <div class="brand">
+        <h1>MonitorV3.2 · La Rioja</h1>
+        <small id="subtitulo">Cargando catálogo y noticias...</small>
+      </div>
+      <div class="actions">
+        <input id="buscador" type="search" placeholder="Buscar título, etiqueta o fuente..." />
+        <button id="btn-refrescar" class="primary">Actualizar vista</button>
+      </div>
+    </div>
+    <nav class="tabs" role="tablist">
+      <button class="active" data-tab="notas">Notas consolidadas</button>
+      <button data-tab="fuentes">Canales RSS y fuentes</button>
+      <button data-tab="vinculados">Contenido vinculado (Original)</button>
+      <button data-tab="taxonomias">Taxonomías y etiquetas</button>
+      <button data-tab="crud">CRUD de fuentes</button>
+    </nav>
+  </header>
+
+  <main>
+    <section class="stats" id="stats"></section>
+    <section class="pills" id="filtro-taxonomias"></section>
+    <section id="vista"></section>
+  </main>
+
+  <dialog id="modal-canal">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px;">
+      <strong id="modal-titulo">Noticias del canal</strong>
+      <button id="modal-cerrar">Cerrar</button>
+    </div>
+    <div id="modal-cuerpo"></div>
+  </dialog>
+
+  <script>
+    const TAXONOMIAS_BASE = [
+      "Todas",
+      "Política y Gestión",
+      "Economía, Finanzas y Producción",
+      "Ciencia, Tecnología y Educación",
+      "Sociedad, Salud y Justicia",
+      "Normativa y Datos Oficiales",
+      "Cultura y Deportes"
+    ];
+
+    const state = {
+      fuentes: [],
+      noticias: [],
+      vinculados: [],
+      archivos: [],
+      estadoFuentes: [],
+      tab: "notas",
+      taxonomia: "Todas",
+      etiqueta: "",
+      busqueda: ""
+    };
+
+    function normalizarCat(cat) {
+      if (!cat || cat === "Instituciones Gubernamentales") return "Entidades de Gobierno";
+      return cat;
+    }
+
+    async function cargarDatos() {
+      const [resF, resN] = await Promise.all([
+        fetch("./data/monitor_v3_fuentes.json?v=" + Date.now()),
+        fetch("./data/monitor_v3_noticias.json?v=" + Date.now())
+      ]);
+      const dataF = resF.ok ? await resF.json() : { sitios: [] };
+      const dataN = resN.ok ? await resN.json() : {};
+
+      state.fuentes = (dataF.sitios || []).map(s => ({
+        ...s,
+        categoria: normalizarCat(s.categoria),
+        tema_por_defecto: ""
+      }));
+      state.noticias = dataN.notas || [];
+      state.vinculados = dataN.contenidos_vinculados || [];
+      state.archivos = dataN.archivos_detectados || [];
+      state.estadoFuentes = dataN.estado_fuentes || [];
+
+      document.getElementById("subtitulo").textContent =
+        `Provincia de La Rioja, Argentina · ${state.fuentes.length} fuentes · ${state.noticias.length} notas`;
+      render();
+    }
+
+    function filtrarNotas() {
+      const q = state.busqueda.trim().toLowerCase();
+      return state.noticias.filter(n => {
+        if (state.taxonomia !== "Todas" && n.taxonomia !== state.taxonomia) return false;
+        if (state.etiqueta && !(n.etiquetas || []).includes(state.etiqueta)) return false;
+        if (!q) return true;
+        const bag = `${n.titulo || ""} ${n.copete || ""} ${n.fuente_nombre || ""} ${(n.etiquetas || []).join(" ")}`.toLowerCase();
+        return bag.includes(q);
+      });
+    }
+
+    function copiarTexto(texto) {
+      navigator.clipboard?.writeText(texto);
+    }
+
+    function abrirModalFuente(fuenteNombre) {
+      const items = state.noticias.filter(n => n.fuente_nombre === fuenteNombre);
+      document.getElementById("modal-titulo").textContent = `${fuenteNombre} (${items.length})`;
+      document.getElementById("modal-cuerpo").innerHTML = items.length
+        ? items.map(n => `
+            <div class="card" style="margin-bottom:8px;">
+              <h3>${n.titulo}</h3>
+              <p style="margin:0;font-size:13px;">${n.copete || ""}</p>
+              <div class="card-actions">
+                <a href="${n.enlace}" target="_blank" rel="noopener">Abrir nota</a>
+                <button onclick="navigator.clipboard?.writeText(${JSON.stringify(`${n.titulo}\n${n.enlace}`)})">Copiar</button>
+              </div>
+            </div>
+          `).join("")
+        : `<p class="empty">Sin notas registradas en esta corrida para ${fuenteNombre}.</p>`;
+      document.getElementById("modal-canal").showModal();
+    }
+
+    function renderStats() {
+      const activas = state.fuentes.filter(f => f.activo !== false).length;
+      const rssCount = state.fuentes.filter(f => f.usar_rss && f.url_rss).length;
+      document.getElementById("stats").innerHTML = `
+        <div class="stat"><b>${state.noticias.length}</b><span>Notas consolidadas</span></div>
+        <div class="stat"><b>${activas}/${state.fuentes.length}</b><span>Fuentes activas</span></div>
+        <div class="stat"><b>${rssCount}</b><span>Canales RSS directos</span></div>
+        <div class="stat"><b>${state.vinculados.length}</b><span>Contenidos vinculados</span></div>
+        <div class="stat"><b>${state.archivos.length}</b><span>Archivos detectados</span></div>
+      `;
+    }
+
+    function renderTaxPills() {
+      document.getElementById("filtro-taxonomias").innerHTML = TAXONOMIAS_BASE.map(t => `
+        <button class="pill ${state.taxonomia === t ? "active" : ""}" data-tax="${t}">${t}</button>
+      `).join("");
+      document.querySelectorAll("#filtro-taxonomias .pill").forEach(btn => {
+        btn.onclick = () => {
+          state.taxonomia = btn.dataset.tax;
+          state.etiqueta = "";
+          render();
+        };
+      });
+    }
+
+    function renderVista() {
+      const cont = document.getElementById("vista");
+      if (state.tab === "notas") {
+        const notas = filtrarNotas();
+        if (!notas.length) {
+          cont.innerHTML = `<div class="empty">No hay notas que coincidan con el filtro actual.</div>`;
+          return;
+        }
+        cont.innerHTML = `<div class="grid">${notas.map(n => `
+          <article class="card">
+            ${n.imagen ? `<img src="${n.imagen}" alt="" loading="lazy" />` : ""}
+            <div class="meta">
+              <button class="link-btn" data-fuente="${n.fuente_nombre}">${n.fuente_nombre}</button>
+              <span>· ${n.taxonomia}</span>
+            </div>
+            <h3>${n.titulo}</h3>
+            <p style="margin:0;font-size:13px;color:var(--muted);">${n.copete || ""}</p>
+            <div class="card-actions">
+              <a href="${n.enlace}" target="_blank" rel="noopener"><button>Abrir nota</button></a>
+              <button onclick="navigator.clipboard?.writeText(${JSON.stringify(`${n.titulo}\n${n.fuente_nombre} · ${n.taxonomia}\n${n.copete || ""}\n${n.enlace}`)})">Copiar contenido</button>
+              <button onclick="navigator.clipboard?.writeText(${JSON.stringify(n.enlace)})">Copiar enlace</button>
+            </div>
+          </article>
+        `).join("")}</div>`;
+        cont.querySelectorAll("[data-fuente]").forEach(el => {
+          el.onclick = () => abrirModalFuente(el.dataset.fuente);
+        });
+      } else if (state.tab === "fuentes") {
+        cont.innerHTML = `<div class="grid">${state.fuentes.map(f => `
+          <div class="card">
+            <div class="meta"><span>${f.categoria}</span><span>· ${f.localidad || ""}</span></div>
+            <button class="link-btn" style="text-align:left;font-size:15px;font-weight:600;" data-fuente="${f.nombre}">${f.nombre}</button>
+            <small style="color:var(--muted);word-break:break-all;">${f.url_rss || f.url_web}</small>
+          </div>
+        `).join("")}</div>`;
+        cont.querySelectorAll("[data-fuente]").forEach(el => {
+          el.onclick = () => abrirModalFuente(el.dataset.fuente);
+        });
+      } else if (state.tab === "vinculados") {
+        cont.innerHTML = state.vinculados.length
+          ? `<div class="grid">${state.vinculados.map(v => `
+              <div class="card">
+                <div class="meta"><span>${v.taxonomia}</span></div>
+                <h3>${v.titulo_original}</h3>
+                <p style="margin:0;font-size:13px;">${v.cuerpo_original}</p>
+                <div class="card-actions">
+                  <button onclick="navigator.clipboard?.writeText(${JSON.stringify(`${v.titulo_original}\n\n${v.cuerpo_original}`)})">Copiar síntesis</button>
+                </div>
+              </div>
+            `).join("")}</div>`
+          : `<div class="empty">Aún no hay contenidos vinculados multicanal en esta corrida.</div>`;
+      } else if (state.tab === "taxonomias") {
+        const counts = {};
+        state.noticias.forEach(n => (n.etiquetas || []).forEach(et => counts[et] = (counts[et] || 0) + 1));
+        cont.innerHTML = `<div class="pills">${Object.entries(counts).map(([et, c]) => `
+          <button class="pill ${state.etiqueta === et ? "active" : ""}" data-et="${et}">${et} (${c})</button>
+        `).join("")}</div>`;
+        cont.querySelectorAll("[data-et]").forEach(btn => {
+          btn.onclick = () => {
+            state.etiqueta = state.etiqueta === btn.dataset.et ? "" : btn.dataset.et;
+            state.tab = "notas";
+            render();
+          };
+        });
+      } else if (state.tab === "crud") {
+        cont.innerHTML = `
+          <div class="card" style="margin-bottom:12px;">
+            <h3>Agregar fuente y exportar JSON</h3>
+            <div class="crud-form">
+              <input id="n-nombre" type="text" placeholder="Nombre de la fuente" />
+              <input id="n-web" type="text" placeholder="https://sitio.gob.ar/" />
+              <input id="n-rss" type="text" placeholder="https://sitio.gob.ar/feed/ (opcional)" />
+              <select id="n-cat">
+                <option value="Medios de Comunicación">Medios de Comunicación</option>
+                <option value="Entidades de Gobierno">Entidades de Gobierno</option>
+                <option value="Universidades">Universidades</option>
+                <option value="Centros de Investigación">Centros de Investigación</option>
+              </select>
+            </div>
+            <div class="card-actions">
+              <button id="btn-add" class="primary">Agregar fuente</button>
+              <button id="btn-export">Descargar monitor_v3_fuentes.json</button>
+            </div>
+          </div>
+          <div class="grid">${state.fuentes.map((f, idx) => `
+            <div class="card">
+              <strong>${f.nombre}</strong>
+              <small style="color:var(--muted);">${f.categoria} · ${f.activo !== false ? "Activa" : "Pausada"}</small>
+              <div class="card-actions">
+                <button onclick="toggleFuente(${idx})">${f.activo !== false ? "Pausar" : "Activar"}</button>
+                <button onclick="borrarFuente(${idx})">Eliminar</button>
+              </div>
+            </div>
+          `).join("")}</div>
+        `;
+        document.getElementById("btn-add").onclick = () => {
+          const nombre = document.getElementById("n-nombre").value.trim();
+          const web = document.getElementById("n-web").value.trim();
+          const rss = document.getElementById("n-rss").value.trim();
+          const cat = document.getElementById("n-cat").value;
+          if (!nombre || !web) return;
+          state.fuentes.push({
+            id: "lr-custom-" + Date.now(),
+            nombre,
+            categoria: cat,
+            subtipo: "Fuente agregada",
+            localidad: "La Rioja",
+            url_web: web,
+            url_rss: rss,
+            usar_rss: Boolean(rss),
+            crawl_profundidad: 3,
+            tema_por_defecto: "",
+            activo: true
+          });
+          render();
+        };
+        document.getElementById("btn-export").onclick = () => {
+          const payload = JSON.stringify({
+            version: "3.2.0-monitor-larioja",
+            actualizado: new Date().toISOString().slice(0, 10),
+            jurisdiccion: "Provincia de La Rioja, Argentina",
+            zona_horaria: "America/Argentina/La_Rioja",
+            frecuencia_cron_utc: ["0 11,16,22 * * *"],
+            taxonomias: TAXONOMIAS_BASE.slice(1),
+            sitios: state.fuentes
+          }, null, 2);
+          const blob = new Blob([payload], { type: "application/json" });
+          const a = document.createElement("a");
+          a.href = URL.createObjectURL(blob);
+          a.download = "monitor_v3_fuentes.json";
+          a.click();
+        };
+      }
+    }
+
+    window.toggleFuente = idx => {
+      state.fuentes[idx].activo = state.fuentes[idx].activo === false ? true : false;
+      render();
+    };
+    window.borrarFuente = idx => {
+      state.fuentes.splice(idx, 1);
+      render();
+    };
+
+    function render() {
+      renderStats();
+      renderTaxPills();
+      renderVista();
+    }
+
+    document.querySelectorAll("nav.tabs button").forEach(btn => {
+      btn.onclick = () => {
+        document.querySelectorAll("nav.tabs button").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        state.tab = btn.dataset.tab;
+        render();
+      };
+    });
+    document.getElementById("buscador").oninput = e => {
+      state.busqueda = e.target.value;
+      renderVista();
+    };
+    document.getElementById("btn-refrescar").onclick = cargarDatos;
+    document.getElementById("modal-cerrar").onclick = () => document.getElementById("modal-canal").close();
+
+    cargarDatos();
+  </script>
+</body>
+</html>
+```[cite: 1, 2, 3, 4, 8]
+
+---
+
+## 3. Pasos finales para activar en producción
+
+1. Sube los archivos corregidos a tu repositorio (`data/monitor_v3_fuentes.json`, `scripts/monitor_v3_recolector.py`, `index.html`, `requirements.txt` y `.github/workflows/monitor-v3-larioja.yml`)[cite: 1, 2, 4].
+2. Verifica en **Settings → Actions → General → Workflow permissions** que esté seleccionado **Read and write permissions**[cite: 1, 4].
+3. Ejecuta el workflow desde **Actions → MonitorV3 Crawl y RSS La Rioja (3x al dia) → Run workflow** para generar y publicar `data/monitor_v3_noticias.json` con datos reales[cite: 1, 4].
