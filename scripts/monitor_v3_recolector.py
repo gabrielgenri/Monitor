@@ -1,9 +1,4 @@
 #!/usr/bin/env python3
-"""
-MonitorV3.2 - Recolector Híbrido RSS/Atom + Crawl HTML y Archivos
-Jurisdicción: Provincia de La Rioja, Argentina
-"""
-
 import hashlib
 import json
 import os
@@ -26,11 +21,7 @@ FUENTES_PATH = os.path.join(BASE_DIR, "data", "monitor_v3_fuentes.json")
 NOTICIAS_PATH = os.path.join(BASE_DIR, "data", "monitor_v3_noticias.json")
 
 HEADERS = {
-    "User-Agent": (
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-        "AppleWebKit/537.36 (KHTML, like Gecko) "
-        "Chrome/128.0.0.0 Safari/537.36 MonitorLaRioja/3.2"
-    ),
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36 MonitorLaRioja/3.2",
     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
     "Accept-Language": "es-AR,es;q=0.9,en;q=0.8",
 }
@@ -42,7 +33,7 @@ TRACKING_PARAMS = {
 
 FILE_EXTS = {
     "csv", "pdf", "zip", "xls", "xlsx", "dta", "dbf", "sav", "txt",
-    "rar", "docx", "shp", "json", "doc", "ods", "shape", "xlsm"
+    "jpeg", "jpg", "rar", "docx", "shp", "json", "doc", "ods", "shape", "xlsm"
 }
 
 STOPWORDS_ES = {
@@ -51,13 +42,7 @@ STOPWORDS_ES = {
     "estas", "aquel", "aquella", "aquellos", "aquellas", "todos", "todas",
     "todo", "toda", "otro", "otra", "otros", "otras", "mismo", "misma",
     "cada", "solo", "también", "tambien", "más", "mas", "menos", "muy",
-    "bien", "mal", "aquí", "aqui", "allí", "alli", "ahora", "antes", "después",
-    "despues", "durante", "mediante", "según", "segun", "contra", "hacia",
-    "ante", "bajo", "cabe", "tras", "sin", "con", "por", "para", "del", "las",
-    "los", "una", "uno", "unos", "unas", "que", "qué", "cómo", "como", "fue",
-    "fueron", "será", "sera", "son", "está", "esta", "están", "estan", "tiene",
-    "tienen", "hacer", "hizo", "dijo", "indicó", "indico", "señaló", "senalo",
-    "informó", "informo", "rioja", "provincia", "argentina", "nuevo", "nueva"
+    "rioja", "provincia", "argentina", "nuevo", "nueva"
 }
 
 
@@ -190,7 +175,7 @@ def clasificar_nota(titulo: str, copete: str, cuerpo: str, sitio: dict, reglas: 
     if puntajes.get(mejor_tax, 0) == 0:
         if sitio.get("tema_por_defecto") in taxonomias:
             mejor_tax = sitio["tema_por_defecto"]
-        elif sitio["categoria"] == "Universidades" or sitio["categoria"] == "Centros de Investigación":
+        elif sitio["categoria"] in ("Universidades", "Centros de Investigación"):
             mejor_tax = "Ciencia, Tecnología y Educación"
         elif "boletin" in normalizar_texto(sitio["nombre"]) or "estadistica" in normalizar_texto(sitio["nombre"]):
             mejor_tax = "Normativa y Datos Oficiales"
@@ -211,8 +196,7 @@ def procesar_feed_rss(sitio: dict, reglas: dict, taxonomias: list, extensiones_o
         return notas, archivos, status, err or f"HTTP {status}"
 
     parsed = feedparser.parse(resp.content)
-    entries = parsed.entries[:12]
-    for entry in entries:
+    for entry in parsed.entries[:12]:
         link = normalizar_url(entry.get("link", ""))
         titulo = re.sub(r"\s+", " ", entry.get("title", "")).strip()
         if not link or not titulo:
@@ -225,7 +209,6 @@ def procesar_feed_rss(sitio: dict, reglas: dict, taxonomias: list, extensiones_o
         cuerpo = copete
         imagen = ""
 
-        # Buscar imagen en media_content, media_thumbnail o enclosures
         for mc in entry.get("media_content", []) or []:
             if mc.get("url"):
                 imagen = urljoin(link, mc["url"])
@@ -245,7 +228,6 @@ def procesar_feed_rss(sitio: dict, reglas: dict, taxonomias: list, extensiones_o
             if img_tag:
                 imagen = urljoin(link, img_tag["src"])
 
-        # Enriquecer cuerpo completo e imagen visitando la nota original
         art_resp, art_status, _ = fetch_url(link, timeout=14)
         if art_resp and art_status == 200 and "text/html" in art_resp.headers.get("Content-Type", ""):
             art_soup = BeautifulSoup(art_resp.text, "html.parser")
@@ -370,10 +352,7 @@ def construir_contenidos_vinculados(notas: list, taxonomias: list):
             "id": f"vinc-{hashlib.md5(tax.encode('utf-8')).hexdigest()[:10]}",
             "taxonomia": tax,
             "titulo_original": f"Síntesis cruzada · {tax} ({len(grupo)} reportes en {len(fuentes_unicas)} fuentes)",
-            "copete": (
-                f"Cruce temático en La Rioja sobre {', '.join(top_tags[:4]) if top_tags else tax} "
-                f"a partir de {len(fuentes_unicas)} fuentes monitoreadas."
-            ),
+            "copete": f"Cruce temático en La Rioja sobre {', '.join(top_tags[:4]) if top_tags else tax} a partir de {len(fuentes_unicas)} fuentes monitoreadas.",
             "cuerpo_original": "\n\n".join(parrafos),
             "fuentes_participantes": fuentes_unicas,
             "total_notas": len(grupo),

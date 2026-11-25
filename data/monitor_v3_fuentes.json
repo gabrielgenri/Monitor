@@ -188,12 +188,7 @@
       "usar_rss": true,
       "crawl_profundidad": 3,
       "tema_por_defecto": "",
-      "activo": true,
-      "estado_ultima_corrida": "ok",
-      "http_status": 200,
-      "ultimo_error": "",
-      "ultima_actualizacion": "2026-11-25 00:22:02 ART",
-      "notas_recolectadas": 0
+      "activo": true
     },
     {
       "id": "lr-medios-02",
@@ -206,12 +201,7 @@
       "usar_rss": true,
       "crawl_profundidad": 3,
       "tema_por_defecto": "",
-      "activo": true,
-      "estado_ultima_corrida": "ok",
-      "http_status": 200,
-      "ultimo_error": "",
-      "ultima_actualizacion": "2026-11-25 00:22:02 ART",
-      "notas_recolectadas": 12
+      "activo": true
     },
     {
       "id": "lr-medios-03",
@@ -224,12 +214,7 @@
       "usar_rss": true,
       "crawl_profundidad": 3,
       "tema_por_defecto": "",
-      "activo": true,
-      "estado_ultima_corrida": "error",
-      "http_status": 0,
-      "ultimo_error": "HTTPSConnectionPool(host='mediosprovincia.com.ar', port=443): Max retries exceeded with url: /feed/ (Caused by NameResolutionError(\"HTTPSConnection(host='mediosprovincia.com.ar', p",
-      "ultima_actualizacion": "2026-11-25 00:22:02 ART",
-      "notas_recolectadas": 0
+      "activo": true
     },
     {
       "id": "lr-medios-04",
@@ -242,12 +227,7 @@
       "usar_rss": false,
       "crawl_profundidad": 3,
       "tema_por_defecto": "",
-      "activo": true,
-      "estado_ultima_corrida": "ok",
-      "http_status": 200,
-      "ultimo_error": "",
-      "ultima_actualizacion": "2026-11-25 00:22:02 ART",
-      "notas_recolectadas": 8
+      "activo": true
     },
     {
       "id": "lr-medios-05",
@@ -260,12 +240,7 @@
       "usar_rss": true,
       "crawl_profundidad": 3,
       "tema_por_defecto": "",
-      "activo": true,
-      "estado_ultima_corrida": "ok",
-      "http_status": 200,
-      "ultimo_error": "",
-      "ultima_actualizacion": "2026-11-25 00:22:02 ART",
-      "notas_recolectadas": 10
+      "activo": true
     },
     {
       "id": "lr-medios-06",
@@ -278,12 +253,7 @@
       "usar_rss": true,
       "crawl_profundidad": 3,
       "tema_por_defecto": "",
-      "activo": true,
-      "estado_ultima_corrida": "ok",
-      "http_status": 200,
-      "ultimo_error": "",
-      "ultima_actualizacion": "2026-11-25 00:22:02 ART",
-      "notas_recolectadas": 10
+      "activo": true
     },
     {
       "id": "lr-medios-07",
@@ -296,12 +266,7 @@
       "usar_rss": true,
       "crawl_profundidad": 3,
       "tema_por_defecto": "",
-      "activo": true,
-      "estado_ultima_corrida": "error",
-      "http_status": 0,
-      "ultimo_error": "HTTPSConnectionPool(host='radioviva.com.ar', port=443): Max retries exceeded with url: /feed/ (Caused by NameResolutionError(\"HTTPSConnection(host='radioviva.com.ar', port=443): Fa",
-      "ultima_actualizacion": "2026-11-25 00:22:02 ART",
-      "notas_recolectadas": 0
+      "activo": true
     },
     {
       "id": "lr-medios-08",
@@ -314,12 +279,7 @@
       "usar_rss": true,
       "crawl_profundidad": 3,
       "tema_por_defecto": "",
-      "activo": true,
-      "estado_ultima_corrida": "ok",
-      "http_status": 200,
-      "ultimo_error": "",
-      "ultima_actualizacion": "2026-11-25 00:22:02 ART",
-      "notas_recolectadas": 7
+      "activo": true
     },
     {
       "id": "lr-medios-09",
@@ -332,12 +292,7 @@
       "usar_rss": true,
       "crawl_profundidad": 3,
       "tema_por_defecto": "",
-      "activo": true,
-      "estado_ultima_corrida": "ok",
-      "http_status": 200,
-      "ultimo_error": "",
-      "ultima_actualizacion": "2026-11-25 00:22:02 ART",
-      "notas_recolectadas": 10
+      "activo": true
     },
     {
       "id": "lr-medios-10",
@@ -350,12 +305,7 @@
       "usar_rss": true,
       "crawl_profundidad": 3,
       "tema_por_defecto": "",
-      "activo": true,
-      "estado_ultima_corrida": "error",
-      "http_status": 0,
-      "ultimo_error": "HTTPSConnectionPool(host='canal9larioja.com.ar', port=443): Max retries exceeded with url: /feed/ (Caused by NameResolutionError(\"HTTPSConnection(host='canal9larioja.com.ar', port=",
-      "ultima_actualizacion": "2026-11-25 00:22:02 ART",
-      "notas_recolectadas": 0
+      "activo": true
     },
     {
       "id": "lr-medios-11",
@@ -368,12 +318,7 @@
       "usar_rss": true,
       "crawl_profundidad": 3,
       "tema_por_defecto": "",
-      "activo": true,
-      "estado_ultima_corrida": "ok",
-      "http_status": 200,
-      "ultimo_error": "",
-      "ultima_actualizacion": "2026-11-25 00:22:02 ART",
-      "notas_recolectadas": 4
+      "activo": true
     },
     {
       "id": "lr-medios-12",
@@ -386,12 +331,7 @@
       "usar_rss": true,
       "crawl_profundidad": 3,
       "tema_por_defecto": "",
-      "activo": true,
-      "estado_ultima_corrida": "error",
-      "http_status": 403,
-      "ultimo_error": "HTTP 403",
-      "ultima_actualizacion": "2026-11-25 00:22:02 ART",
-      "notas_recolectadas": 0
+      "activo": true
     },
     {
       "id": "lr-medios-13",
@@ -404,12 +344,7 @@
       "usar_rss": true,
       "crawl_profundidad": 3,
       "tema_por_defecto": "",
-      "activo": true,
-      "estado_ultima_corrida": "ok",
-      "http_status": 200,
-      "ultimo_error": "",
-      "ultima_actualizacion": "2026-11-25 00:22:02 ART",
-      "notas_recolectadas": 0
+      "activo": true
     },
     {
       "id": "lr-medios-14",
@@ -422,12 +357,7 @@
       "usar_rss": true,
       "crawl_profundidad": 3,
       "tema_por_defecto": "",
-      "activo": true,
-      "estado_ultima_corrida": "ok",
-      "http_status": 200,
-      "ultimo_error": "",
-      "ultima_actualizacion": "2026-11-25 00:22:02 ART",
-      "notas_recolectadas": 10
+      "activo": true
     },
     {
       "id": "lr-medios-15",
@@ -440,12 +370,7 @@
       "usar_rss": true,
       "crawl_profundidad": 3,
       "tema_por_defecto": "",
-      "activo": true,
-      "estado_ultima_corrida": "error",
-      "http_status": 0,
-      "ultimo_error": "HTTPSConnectionPool(host='digitalchamical.com.ar', port=443): Max retries exceeded with url: /feed/ (Caused by NameResolutionError(\"HTTPSConnection(host='digitalchamical.com.ar', p",
-      "ultima_actualizacion": "2026-11-25 00:22:02 ART",
-      "notas_recolectadas": 0
+      "activo": true
     },
     {
       "id": "lr-medios-16",
@@ -458,12 +383,7 @@
       "usar_rss": true,
       "crawl_profundidad": 3,
       "tema_por_defecto": "",
-      "activo": true,
-      "estado_ultima_corrida": "error",
-      "http_status": 0,
-      "ultimo_error": "HTTPSConnectionPool(host='aimogastanoticias.com.ar', port=443): Max retries exceeded with url: /feed/ (Caused by NameResolutionError(\"HTTPSConnection(host='aimogastanoticias.com.ar",
-      "ultima_actualizacion": "2026-11-25 00:22:02 ART",
-      "notas_recolectadas": 0
+      "activo": true
     },
     {
       "id": "lr-medios-17",
@@ -476,12 +396,7 @@
       "usar_rss": true,
       "crawl_profundidad": 3,
       "tema_por_defecto": "",
-      "activo": true,
-      "estado_ultima_corrida": "ok",
-      "http_status": 200,
-      "ultimo_error": "",
-      "ultima_actualizacion": "2026-11-25 00:22:02 ART",
-      "notas_recolectadas": 10
+      "activo": true
     },
     {
       "id": "lr-medios-18",
@@ -494,12 +409,7 @@
       "usar_rss": true,
       "crawl_profundidad": 3,
       "tema_por_defecto": "",
-      "activo": true,
-      "estado_ultima_corrida": "ok",
-      "http_status": 200,
-      "ultimo_error": "",
-      "ultima_actualizacion": "2026-11-25 00:22:02 ART",
-      "notas_recolectadas": 0
+      "activo": true
     },
     {
       "id": "lr-medios-19",
@@ -512,12 +422,7 @@
       "usar_rss": true,
       "crawl_profundidad": 3,
       "tema_por_defecto": "",
-      "activo": true,
-      "estado_ultima_corrida": "ok",
-      "http_status": 200,
-      "ultimo_error": "",
-      "ultima_actualizacion": "2026-11-25 00:22:02 ART",
-      "notas_recolectadas": 12
+      "activo": true
     },
     {
       "id": "lr-medios-20",
@@ -530,12 +435,7 @@
       "usar_rss": true,
       "crawl_profundidad": 3,
       "tema_por_defecto": "",
-      "activo": true,
-      "estado_ultima_corrida": "ok",
-      "http_status": 200,
-      "ultimo_error": "",
-      "ultima_actualizacion": "2026-11-25 00:22:02 ART",
-      "notas_recolectadas": 8
+      "activo": true
     },
     {
       "id": "lr-gob-01",
@@ -548,12 +448,7 @@
       "usar_rss": false,
       "crawl_profundidad": 3,
       "tema_por_defecto": "",
-      "activo": true,
-      "estado_ultima_corrida": "ok",
-      "http_status": 200,
-      "ultimo_error": "",
-      "ultima_actualizacion": "2026-11-25 00:22:02 ART",
-      "notas_recolectadas": 0
+      "activo": true
     },
     {
       "id": "lr-gob-02",
@@ -566,12 +461,7 @@
       "usar_rss": false,
       "crawl_profundidad": 3,
       "tema_por_defecto": "",
-      "activo": true,
-      "estado_ultima_corrida": "error",
-      "http_status": 0,
-      "ultimo_error": "HTTPSConnectionPool(host='boletinoficial.larioja.gob.ar', port=443): Max retries exceeded with url: / (Caused by NameResolutionError(\"HTTPSConnection(host='boletinoficial.larioja.g",
-      "ultima_actualizacion": "2026-11-25 00:22:02 ART",
-      "notas_recolectadas": 0
+      "activo": true
     },
     {
       "id": "lr-gob-03",
@@ -584,12 +474,7 @@
       "usar_rss": false,
       "crawl_profundidad": 3,
       "tema_por_defecto": "",
-      "activo": true,
-      "estado_ultima_corrida": "ok",
-      "http_status": 200,
-      "ultimo_error": "",
-      "ultima_actualizacion": "2026-11-25 00:22:02 ART",
-      "notas_recolectadas": 7
+      "activo": true
     },
     {
       "id": "lr-gob-04",
@@ -602,12 +487,7 @@
       "usar_rss": false,
       "crawl_profundidad": 3,
       "tema_por_defecto": "",
-      "activo": true,
-      "estado_ultima_corrida": "ok",
-      "http_status": 200,
-      "ultimo_error": "",
-      "ultima_actualizacion": "2026-11-25 00:22:02 ART",
-      "notas_recolectadas": 8
+      "activo": true
     },
     {
       "id": "lr-gob-05",
@@ -620,12 +500,7 @@
       "usar_rss": false,
       "crawl_profundidad": 3,
       "tema_por_defecto": "",
-      "activo": true,
-      "estado_ultima_corrida": "ok",
-      "http_status": 200,
-      "ultimo_error": "",
-      "ultima_actualizacion": "2026-11-25 00:22:02 ART",
-      "notas_recolectadas": 0
+      "activo": true
     },
     {
       "id": "lr-gob-06",
@@ -638,12 +513,7 @@
       "usar_rss": false,
       "crawl_profundidad": 3,
       "tema_por_defecto": "",
-      "activo": true,
-      "estado_ultima_corrida": "ok",
-      "http_status": 200,
-      "ultimo_error": "",
-      "ultima_actualizacion": "2026-11-25 00:22:02 ART",
-      "notas_recolectadas": 0
+      "activo": true
     },
     {
       "id": "lr-gob-07",
@@ -656,12 +526,7 @@
       "usar_rss": false,
       "crawl_profundidad": 3,
       "tema_por_defecto": "",
-      "activo": true,
-      "estado_ultima_corrida": "error",
-      "http_status": 0,
-      "ultimo_error": "HTTPSConnectionPool(host='chilecito.gob.ar', port=443): Max retries exceeded with url: / (Caused by NameResolutionError(\"HTTPSConnection(host='chilecito.gob.ar', port=443): Failed ",
-      "ultima_actualizacion": "2026-11-25 00:22:02 ART",
-      "notas_recolectadas": 0
+      "activo": true
     },
     {
       "id": "lr-gob-08",
@@ -674,12 +539,7 @@
       "usar_rss": false,
       "crawl_profundidad": 3,
       "tema_por_defecto": "",
-      "activo": true,
-      "estado_ultima_corrida": "error",
-      "http_status": 0,
-      "ultimo_error": "HTTPSConnectionPool(host='estadistica.larioja.gob.ar', port=443): Max retries exceeded with url: / (Caused by NameResolutionError(\"HTTPSConnection(host='estadistica.larioja.gob.ar'",
-      "ultima_actualizacion": "2026-11-25 00:22:02 ART",
-      "notas_recolectadas": 0
+      "activo": true
     },
     {
       "id": "lr-gob-09",
@@ -692,12 +552,7 @@
       "usar_rss": false,
       "crawl_profundidad": 3,
       "tema_por_defecto": "",
-      "activo": true,
-      "estado_ultima_corrida": "error",
-      "http_status": 0,
-      "ultimo_error": "HTTPSConnectionPool(host='ide.larioja.gob.ar', port=443): Max retries exceeded with url: / (Caused by NameResolutionError(\"HTTPSConnection(host='ide.larioja.gob.ar', port=443): Fai",
-      "ultima_actualizacion": "2026-11-25 00:22:02 ART",
-      "notas_recolectadas": 0
+      "activo": true
     },
     {
       "id": "lr-gob-10",
@@ -710,12 +565,7 @@
       "usar_rss": false,
       "crawl_profundidad": 3,
       "tema_por_defecto": "",
-      "activo": true,
-      "estado_ultima_corrida": "error",
-      "http_status": 0,
-      "ultimo_error": "HTTPSConnectionPool(host='dgip.larioja.gob.ar', port=443): Max retries exceeded with url: / (Caused by NameResolutionError(\"HTTPSConnection(host='dgip.larioja.gob.ar', port=443): F",
-      "ultima_actualizacion": "2026-11-25 00:22:02 ART",
-      "notas_recolectadas": 0
+      "activo": true
     },
     {
       "id": "lr-gob-11",
@@ -728,12 +578,7 @@
       "usar_rss": false,
       "crawl_profundidad": 3,
       "tema_por_defecto": "",
-      "activo": true,
-      "estado_ultima_corrida": "ok",
-      "http_status": 200,
-      "ultimo_error": "",
-      "ultima_actualizacion": "2026-11-25 00:22:02 ART",
-      "notas_recolectadas": 0
+      "activo": true
     },
     {
       "id": "lr-gob-12",
@@ -746,12 +591,7 @@
       "usar_rss": false,
       "crawl_profundidad": 3,
       "tema_por_defecto": "",
-      "activo": true,
-      "estado_ultima_corrida": "ok",
-      "http_status": 200,
-      "ultimo_error": "",
-      "ultima_actualizacion": "2026-11-25 00:22:02 ART",
-      "notas_recolectadas": 0
+      "activo": true
     },
     {
       "id": "lr-gob-13",
@@ -764,12 +604,7 @@
       "usar_rss": false,
       "crawl_profundidad": 3,
       "tema_por_defecto": "",
-      "activo": true,
-      "estado_ultima_corrida": "error",
-      "http_status": 403,
-      "ultimo_error": "HTTP 403",
-      "ultima_actualizacion": "2026-11-25 00:22:02 ART",
-      "notas_recolectadas": 0
+      "activo": true
     },
     {
       "id": "lr-gob-14",
@@ -782,12 +617,7 @@
       "usar_rss": false,
       "crawl_profundidad": 3,
       "tema_por_defecto": "",
-      "activo": true,
-      "estado_ultima_corrida": "ok",
-      "http_status": 200,
-      "ultimo_error": "",
-      "ultima_actualizacion": "2026-11-25 00:22:02 ART",
-      "notas_recolectadas": 0
+      "activo": true
     },
     {
       "id": "lr-gob-15",
@@ -800,12 +630,7 @@
       "usar_rss": false,
       "crawl_profundidad": 3,
       "tema_por_defecto": "",
-      "activo": true,
-      "estado_ultima_corrida": "ok",
-      "http_status": 200,
-      "ultimo_error": "",
-      "ultima_actualizacion": "2026-11-25 00:22:02 ART",
-      "notas_recolectadas": 5
+      "activo": true
     },
     {
       "id": "lr-gob-16",
@@ -818,12 +643,7 @@
       "usar_rss": false,
       "crawl_profundidad": 3,
       "tema_por_defecto": "",
-      "activo": true,
-      "estado_ultima_corrida": "error",
-      "http_status": 0,
-      "ultimo_error": "HTTPSConnectionPool(host='tribunaldecuentas.larioja.gob.ar', port=443): Max retries exceeded with url: / (Caused by NameResolutionError(\"HTTPSConnection(host='tribunaldecuentas.lar",
-      "ultima_actualizacion": "2026-11-25 00:22:02 ART",
-      "notas_recolectadas": 0
+      "activo": true
     },
     {
       "id": "lr-gob-17",
@@ -836,12 +656,7 @@
       "usar_rss": false,
       "crawl_profundidad": 3,
       "tema_por_defecto": "",
-      "activo": true,
-      "estado_ultima_corrida": "ok",
-      "http_status": 200,
-      "ultimo_error": "",
-      "ultima_actualizacion": "2026-11-25 00:22:02 ART",
-      "notas_recolectadas": 0
+      "activo": true
     },
     {
       "id": "lr-gob-18",
@@ -854,12 +669,7 @@
       "usar_rss": false,
       "crawl_profundidad": 3,
       "tema_por_defecto": "",
-      "activo": true,
-      "estado_ultima_corrida": "error",
-      "http_status": 0,
-      "ultimo_error": "HTTPSConnectionPool(host='eucop.larioja.gob.ar', port=443): Max retries exceeded with url: / (Caused by NameResolutionError(\"HTTPSConnection(host='eucop.larioja.gob.ar', port=443):",
-      "ultima_actualizacion": "2026-11-25 00:22:02 ART",
-      "notas_recolectadas": 0
+      "activo": true
     },
     {
       "id": "lr-gob-19",
@@ -872,12 +682,7 @@
       "usar_rss": false,
       "crawl_profundidad": 3,
       "tema_por_defecto": "",
-      "activo": true,
-      "estado_ultima_corrida": "ok",
-      "http_status": 200,
-      "ultimo_error": "",
-      "ultima_actualizacion": "2026-11-25 00:22:02 ART",
-      "notas_recolectadas": 8
+      "activo": true
     },
     {
       "id": "lr-gob-20",
@@ -890,12 +695,7 @@
       "usar_rss": false,
       "crawl_profundidad": 3,
       "tema_por_defecto": "",
-      "activo": true,
-      "estado_ultima_corrida": "error",
-      "http_status": 0,
-      "ultimo_error": "HTTPSConnectionPool(host='parqueeolicoarauco.com.ar', port=443): Max retries exceeded with url: / (Caused by NameResolutionError(\"HTTPSConnection(host='parqueeolicoarauco.com.ar', ",
-      "ultima_actualizacion": "2026-11-25 00:22:02 ART",
-      "notas_recolectadas": 0
+      "activo": true
     },
     {
       "id": "lr-uni-01",
@@ -908,12 +708,7 @@
       "usar_rss": true,
       "crawl_profundidad": 3,
       "tema_por_defecto": "",
-      "activo": true,
-      "estado_ultima_corrida": "ok",
-      "http_status": 200,
-      "ultimo_error": "",
-      "ultima_actualizacion": "2026-11-25 00:22:02 ART",
-      "notas_recolectadas": 0
+      "activo": true
     },
     {
       "id": "lr-uni-02",
@@ -926,12 +721,7 @@
       "usar_rss": false,
       "crawl_profundidad": 3,
       "tema_por_defecto": "",
-      "activo": true,
-      "estado_ultima_corrida": "error",
-      "http_status": 0,
-      "ultimo_error": "Timeout de conexión",
-      "ultima_actualizacion": "2026-11-25 00:22:02 ART",
-      "notas_recolectadas": 0
+      "activo": true
     },
     {
       "id": "lr-uni-03",
@@ -944,12 +734,7 @@
       "usar_rss": true,
       "crawl_profundidad": 3,
       "tema_por_defecto": "",
-      "activo": true,
-      "estado_ultima_corrida": "ok",
-      "http_status": 200,
-      "ultimo_error": "",
-      "ultima_actualizacion": "2026-11-25 00:22:02 ART",
-      "notas_recolectadas": 3
+      "activo": true
     },
     {
       "id": "lr-uni-04",
@@ -962,12 +747,7 @@
       "usar_rss": false,
       "crawl_profundidad": 3,
       "tema_por_defecto": "",
-      "activo": true,
-      "estado_ultima_corrida": "ok",
-      "http_status": 200,
-      "ultimo_error": "",
-      "ultima_actualizacion": "2026-11-25 00:22:02 ART",
-      "notas_recolectadas": 7
+      "activo": true
     },
     {
       "id": "lr-uni-05",
@@ -980,12 +760,7 @@
       "usar_rss": false,
       "crawl_profundidad": 3,
       "tema_por_defecto": "",
-      "activo": true,
-      "estado_ultima_corrida": "error",
-      "http_status": 404,
-      "ultimo_error": "HTTP 404",
-      "ultima_actualizacion": "2026-11-25 00:22:02 ART",
-      "notas_recolectadas": 0
+      "activo": true
     },
     {
       "id": "lr-uni-06",
@@ -998,12 +773,7 @@
       "usar_rss": false,
       "crawl_profundidad": 1,
       "tema_por_defecto": "",
-      "activo": true,
-      "estado_ultima_corrida": "ok",
-      "http_status": 200,
-      "ultimo_error": "",
-      "ultima_actualizacion": "2026-11-25 00:22:02 ART",
-      "notas_recolectadas": 8
+      "activo": true
     },
     {
       "id": "lr-inv-01",
@@ -1016,12 +786,7 @@
       "usar_rss": true,
       "crawl_profundidad": 3,
       "tema_por_defecto": "",
-      "activo": true,
-      "estado_ultima_corrida": "ok",
-      "http_status": 200,
-      "ultimo_error": "",
-      "ultima_actualizacion": "2026-11-25 00:22:02 ART",
-      "notas_recolectadas": 10
+      "activo": true
     },
     {
       "id": "lr-inv-02",
@@ -1034,12 +799,7 @@
       "usar_rss": false,
       "crawl_profundidad": 3,
       "tema_por_defecto": "",
-      "activo": true,
-      "estado_ultima_corrida": "error",
-      "http_status": 404,
-      "ultimo_error": "HTTP 404",
-      "ultima_actualizacion": "2026-11-25 00:22:02 ART",
-      "notas_recolectadas": 0
+      "activo": true
     },
     {
       "id": "lr-inv-03",
@@ -1052,12 +812,7 @@
       "usar_rss": false,
       "crawl_profundidad": 3,
       "tema_por_defecto": "",
-      "activo": true,
-      "estado_ultima_corrida": "error",
-      "http_status": 404,
-      "ultimo_error": "HTTP 404",
-      "ultima_actualizacion": "2026-11-25 00:22:02 ART",
-      "notas_recolectadas": 0
+      "activo": true
     },
     {
       "id": "lr-inv-04",
@@ -1070,12 +825,7 @@
       "usar_rss": false,
       "crawl_profundidad": 3,
       "tema_por_defecto": "",
-      "activo": true,
-      "estado_ultima_corrida": "error",
-      "http_status": 404,
-      "ultimo_error": "HTTP 404",
-      "ultima_actualizacion": "2026-11-25 00:22:02 ART",
-      "notas_recolectadas": 0
+      "activo": true
     },
     {
       "id": "lr-inv-05",
@@ -1088,12 +838,7 @@
       "usar_rss": false,
       "crawl_profundidad": 3,
       "tema_por_defecto": "",
-      "activo": true,
-      "estado_ultima_corrida": "error",
-      "http_status": 0,
-      "ultimo_error": "HTTPSConnectionPool(host='polotecnologico.larioja.gob.ar', port=443): Max retries exceeded with url: / (Caused by NameResolutionError(\"HTTPSConnection(host='polotecnologico.larioja",
-      "ultima_actualizacion": "2026-11-25 00:22:02 ART",
-      "notas_recolectadas": 0
+      "activo": true
     },
     {
       "id": "lr-inv-06",
@@ -1106,12 +851,7 @@
       "usar_rss": false,
       "crawl_profundidad": 3,
       "tema_por_defecto": "",
-      "activo": true,
-      "estado_ultima_corrida": "ok",
-      "http_status": 200,
-      "ultimo_error": "",
-      "ultima_actualizacion": "2026-11-25 00:22:02 ART",
-      "notas_recolectadas": 1
+      "activo": true
     },
     {
       "id": "lr-inv-07",
@@ -1124,12 +864,7 @@
       "usar_rss": false,
       "crawl_profundidad": 3,
       "tema_por_defecto": "",
-      "activo": true,
-      "estado_ultima_corrida": "error",
-      "http_status": 0,
-      "ultimo_error": "HTTPSConnectionPool(host='cienciaytecnologia.larioja.gob.ar', port=443): Max retries exceeded with url: / (Caused by NameResolutionError(\"HTTPSConnection(host='cienciaytecnologia.l",
-      "ultima_actualizacion": "2026-11-25 00:22:02 ART",
-      "notas_recolectadas": 0
+      "activo": true
     }
   ]
 }
