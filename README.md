@@ -1,20 +1,19 @@
-# MonitorV3.2 · RSS & Crawl La Rioja (Node 24 + GitHub Actions)
+# MonitorV3.2 · RSS & Crawl La Rioja
 
-Paquete completo de **MonitorV3.2** para la Provincia de La Rioja, Argentina, con ejecución programada 3 veces al día (`0 11,16,22 * * *` UTC -> `08:00`, `13:00` y `19:00` hora local), optimizado con `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"`, control de concurrencia y limpieza de procesos huérfanos.
+Sistema de monitoreo automatizado de medios de comunicación, organismos gubernamentales, universidades y centros de investigación de la **Provincia de La Rioja, Argentina**.
 
-## Estructura del paquete
+## Estructura del proyecto
 
-```text
-monitor-v3.2-larioja.zip
-├── .github/
-│   └── workflows/
-│       └── monitor-v3-larioja.yml
-├── data/
-│   ├── monitor_v3_fuentes.json
-│   └── monitor_v3_noticias.json
-├── scripts/
-│   └── monitor_v3_recolector.py
-├── index.html
-├── requirements.txt
-└── README.md
-```
+- `.github/workflows/monitor-v3-larioja.yml`: Automatización en GitHub Actions (Node 24, Python 3.12, 3 ejecuciones diarias a las 08:00, 13:00 y 19:00 ART + ejecución manual).
+- `data/monitor_v3_fuentes.json`: Catálogo unificado de 53 fuentes de La Rioja con `tema_por_defecto: ""`, categorías normalizadas, 6 taxonomías y reglas de clasificación.
+- `data/monitor_v3_noticias.json`: Salida consolidada de notas, imágenes, síntesis cruzadas (`contenidos_vinculados`) y archivos detectados.
+- `scripts/monitor_v3_recolector.py`: Recolector híbrido RSS/Atom + Crawl HTML con normalización de URLs, deduplicación por hash, limpieza de ruido HTML y trazabilidad de estado HTTP por fuente.
+- `index.html`: SPA móvil con filtros por taxonomía, modal por fuente/canal, vista de archivos detectados y CRUD local con exportación de JSON.
+- `requirements.txt`: Dependencias de Python.
+
+## Despliegue en GitHub
+
+1. Sube todos los archivos a la rama `main` respetando las carpetas `.github/workflows/`, `data/` y `scripts/`.
+2. En **Settings → Actions → General → Workflow permissions**, habilita **Read and write permissions**.
+3. En **Settings → Pages**, selecciona **Deploy from a branch** (`main` / `/ (root)`).
+4. Ve a **Actions → MonitorV3.2 Crawl y RSS La Rioja (Node 24 / 3x al dia)** y pulsa **Run workflow** para poblar `data/monitor_v3_noticias.json`.

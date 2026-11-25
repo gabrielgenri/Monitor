@@ -6,43 +6,35 @@
   <title>MonitorV3.2 · RSS & Crawl La Rioja</title>
   <style>
     :root {
-      --bg: #f6f7f9;
+      --bg: #f6f8fb;
       --surface: #ffffff;
-      --surface-alt: #f0f2f5;
-      --text: #14171a;
-      --muted: #5c6672;
-      --border: #e2e6ec;
-      --accent: #0f52ba;
-      --accent-soft: #eaf1fc;
-      --ok: #137333;
-      --ok-soft: #e6f4ea;
-      --warn: #b06000;
-      --warn-soft: #fef7e0;
-      --danger: #c5221f;
-      --danger-soft: #fce8e6;
-      --radius: 10px;
+      --border: #e2e8f0;
+      --text: #0f172a;
+      --muted: #64748b;
+      --primary: #1d4ed8;
+      --primary-soft: #eff6ff;
+      --ok: #15803d;
+      --warn: #b45309;
+      --err: #b91c1c;
+      --radius: 12px;
     }
-
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-
+    * { box-sizing: border-box; }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       background: var(--bg);
       color: var(--text);
       line-height: 1.45;
-      -webkit-font-smoothing: antialiased;
     }
-
-    .topbar {
+    header {
       position: sticky;
       top: 0;
       z-index: 30;
       background: var(--surface);
       border-bottom: 1px solid var(--border);
-      padding: 10px 14px;
+      padding: 12px 16px;
     }
-
-    .topbar-inner {
+    .topbar {
       max-width: 1120px;
       margin: 0 auto;
       display: flex;
@@ -51,1101 +43,744 @@
       justify-content: space-between;
       gap: 10px;
     }
-
-    .brand {
+    .brand h1 {
+      margin: 0;
+      font-size: 1.1rem;
       display: flex;
       align-items: center;
       gap: 8px;
     }
-
-    .brand-badge {
-      background: var(--accent);
-      color: #fff;
-      font-size: 11px;
+    .badge {
+      background: var(--primary-soft);
+      color: var(--primary);
+      font-size: 0.72rem;
       font-weight: 700;
-      padding: 2px 7px;
+      padding: 2px 8px;
       border-radius: 999px;
-      letter-spacing: 0.03em;
     }
-
-    .brand h1 {
-      font-size: 16px;
-      font-weight: 700;
-      letter-spacing: -0.01em;
-    }
-
-    .brand-sub {
-      font-size: 12px;
+    .subtitle {
+      margin: 2px 0 0;
+      font-size: 0.8rem;
       color: var(--muted);
     }
-
-    .toolbar {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex: 1 1 280px;
-      justify-content: flex-end;
-    }
-
-    .search-input {
-      width: 100%;
-      max-width: 300px;
-      padding: 7px 11px;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      font-size: 13px;
-      background: var(--bg);
-      color: var(--text);
-    }
-
-    .search-input:focus {
-      outline: 2px solid var(--accent);
-      border-color: transparent;
-      background: var(--surface);
-    }
-
     .btn {
       border: 1px solid var(--border);
       background: var(--surface);
       color: var(--text);
-      padding: 7px 11px;
+      padding: 7px 12px;
       border-radius: 8px;
-      font-size: 12.5px;
+      font-size: 0.82rem;
       font-weight: 600;
       cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      white-space: nowrap;
-      text-decoration: none;
     }
-
-    .btn:hover { background: var(--surface-alt); }
-    .btn-primary { background: var(--accent); color: #fff; border-color: var(--accent); }
-    .btn-primary:hover { opacity: 0.94; background: var(--accent); }
-    .btn-danger { color: var(--danger); border-color: #f3c6c4; background: #fffafa; }
-    .btn-danger:hover { background: var(--danger-soft); }
-
-    .tabs-wrap {
+    .btn-primary {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+    }
+    .btn-sm { padding: 5px 9px; font-size: 0.76rem; }
+    .tabs {
       max-width: 1120px;
       margin: 10px auto 0;
       display: flex;
       gap: 6px;
       overflow-x: auto;
-      scrollbar-width: none;
-      padding-bottom: 2px;
+      padding-bottom: 4px;
     }
-    .tabs-wrap::-webkit-scrollbar { display: none; }
-
-    .tab-btn {
-      background: transparent;
-      border: 1px solid transparent;
+    .tab {
+      white-space: nowrap;
+      border: 1px solid var(--border);
+      background: var(--bg);
       color: var(--muted);
       padding: 6px 12px;
-      border-radius: 8px;
-      font-size: 13px;
+      border-radius: 999px;
+      font-size: 0.8rem;
       font-weight: 600;
       cursor: pointer;
-      white-space: nowrap;
     }
-
-    .tab-btn.active {
-      background: var(--accent-soft);
-      color: var(--accent);
-      border-color: #c8dcf9;
+    .tab.active {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
     }
-
-    .container {
+    main {
       max-width: 1120px;
-      margin: 14px auto 40px;
-      padding: 0 14px;
+      margin: 16px auto 48px;
+      padding: 0 16px;
     }
-
-    .stats-strip {
+    .alert {
+      background: #fef3c7;
+      border: 1px solid #f59e0b;
+      color: #92400e;
+      padding: 10px 14px;
+      border-radius: var(--radius);
+      font-size: 0.84rem;
+      margin-bottom: 14px;
+      display: none;
+    }
+    .kpis {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-      gap: 8px;
+      gap: 10px;
       margin-bottom: 14px;
     }
-
-    .stat-card {
+    .kpi {
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: var(--radius);
       padding: 10px 12px;
     }
-
-    .stat-num { font-size: 18px; font-weight: 700; }
-    .stat-lbl { font-size: 11.5px; color: var(--muted); }
-
-    .pills-row {
-      display: flex;
-      gap: 6px;
-      overflow-x: auto;
-      padding-bottom: 6px;
-      margin-bottom: 12px;
-      scrollbar-width: none;
+    .kpi strong {
+      display: block;
+      font-size: 1.25rem;
+      color: var(--primary);
     }
-    .pills-row::-webkit-scrollbar { display: none; }
-
+    .kpi span {
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 14px;
+      align-items: center;
+    }
+    .search-box {
+      flex: 1 1 220px;
+      padding: 7px 11px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.84rem;
+      background: var(--surface);
+    }
     .pill {
       border: 1px solid var(--border);
       background: var(--surface);
       color: var(--text);
       padding: 5px 10px;
       border-radius: 999px;
-      font-size: 12px;
-      font-weight: 500;
+      font-size: 0.76rem;
       cursor: pointer;
-      white-space: nowrap;
     }
-
     .pill.active {
       background: var(--text);
       color: #fff;
       border-color: var(--text);
     }
-
-    .feed-list {
+    .grid {
       display: grid;
-      gap: 10px;
+      grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+      gap: 14px;
     }
-
-    .item-card {
+    .card {
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      padding: 13px 14px;
-      display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 12px;
-      align-items: start;
-    }
-
-    .item-card.with-thumb {
-      grid-template-columns: 1fr 104px;
-    }
-
-    @media (max-width: 640px) {
-      .item-card, .item-card.with-thumb {
-        grid-template-columns: 1fr;
-      }
-      .item-thumb {
-        width: 100%;
-        height: 170px;
-      }
-    }
-
-    .item-meta {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 6px;
-      font-size: 11.5px;
-      color: var(--muted);
-      margin-bottom: 5px;
-    }
-
-    .source-link {
-      color: var(--accent);
-      font-weight: 700;
-      text-decoration: none;
-      cursor: pointer;
-      background: none;
-      border: none;
-      font-size: 12px;
-      padding: 0;
-      text-align: left;
-    }
-    .source-link:hover { text-decoration: underline; }
-
-    .tag-chip {
-      background: var(--surface-alt);
-      color: var(--text);
-      padding: 2px 7px;
-      border-radius: 6px;
-      font-size: 11px;
-      font-weight: 600;
-    }
-
-    .item-title {
-      font-size: 15.5px;
-      font-weight: 700;
-      margin-bottom: 4px;
-      color: var(--text);
-    }
-
-    .item-copete {
-      font-size: 13.5px;
-      color: var(--muted);
-      margin-bottom: 8px;
-    }
-
-    .item-cuerpo-preview {
-      font-size: 13px;
-      color: var(--text);
-      background: var(--surface-alt);
-      border-radius: 8px;
-      padding: 8px 10px;
-      margin-bottom: 8px;
-      max-height: 110px;
-      overflow-y: auto;
-      white-space: pre-line;
-    }
-
-    .item-thumb {
-      width: 104px;
-      height: 78px;
-      object-fit: cover;
-      border-radius: 8px;
-      border: 1px solid var(--border);
-      background: var(--surface-alt);
-    }
-
-    .item-actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      align-items: center;
-    }
-
-    .files-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 5px;
-      margin-bottom: 8px;
-    }
-
-    .file-badge {
-      font-size: 11px;
-      font-weight: 700;
-      padding: 2px 7px;
-      border-radius: 5px;
-      background: var(--warn-soft);
-      color: var(--warn);
-      text-decoration: none;
-      border: 1px solid #f4dc9a;
-    }
-
-    .channels-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
-      gap: 10px;
-    }
-
-    .channel-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 12px;
+      overflow: hidden;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      gap: 8px;
     }
-
-    .status-pill {
-      font-size: 11px;
+    .card img {
+      width: 100%;
+      height: 165px;
+      object-fit: cover;
+      background: #e2e8f0;
+    }
+    .card-body { padding: 14px; }
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+      font-size: 0.74rem;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    .source-link {
+      color: var(--primary);
       font-weight: 700;
-      padding: 2px 7px;
-      border-radius: 999px;
+      cursor: pointer;
+      text-decoration: underline;
     }
-    .status-on { background: var(--ok-soft); color: var(--ok); }
-    .status-off { background: var(--surface-alt); color: var(--muted); }
-
+    .card h3 {
+      margin: 0 0 8px;
+      font-size: 0.98rem;
+    }
+    .card p {
+      margin: 0 0 10px;
+      font-size: 0.84rem;
+      color: #334155;
+    }
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-bottom: 10px;
+    }
+    .tag {
+      background: #f1f5f9;
+      color: #334155;
+      font-size: 0.7rem;
+      padding: 2px 7px;
+      border-radius: 6px;
+    }
+    .card-actions {
+      padding: 10px 14px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      background: #fafbfc;
+    }
+    .empty {
+      background: var(--surface);
+      border: 1px dashed var(--border);
+      border-radius: var(--radius);
+      padding: 28px;
+      text-align: center;
+      color: var(--muted);
+    }
     .crud-form {
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: var(--radius);
       padding: 14px;
-      margin-bottom: 14px;
+      margin-bottom: 16px;
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
       gap: 10px;
     }
-
-    .field {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-    .field label {
-      font-size: 11.5px;
-      font-weight: 600;
-      color: var(--muted);
-    }
-    .field input, .field select {
-      padding: 7px 9px;
-      border: 1px solid var(--border);
-      border-radius: 7px;
-      font-size: 13px;
-      background: var(--surface);
-      color: var(--text);
-    }
-
-    .modal-backdrop {
-      position: fixed;
-      inset: 0;
-      background: rgba(15, 23, 42, 0.55);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 14px;
-      z-index: 60;
-    }
-    .modal-backdrop.open { display: flex; }
-
-    .modal-box {
-      background: var(--surface);
-      border-radius: 12px;
-      border: 1px solid var(--border);
-      max-width: 760px;
+    .crud-form input, .crud-form select {
       width: 100%;
-      max-height: 88vh;
-      overflow-y: auto;
-      padding: 16px;
-      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.22);
+      padding: 7px 10px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.82rem;
     }
-
+    .status-ok { color: var(--ok); font-weight: 700; }
+    .status-err { color: var(--err); font-weight: 700; }
+    dialog {
+      width: min(760px, 94vw);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 0;
+      box-shadow: 0 20px 45px rgba(15, 23, 42, 0.25);
+    }
+    dialog::backdrop { background: rgba(15, 23, 42, 0.5); }
     .modal-head {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 10px;
+      padding: 14px 16px;
       border-bottom: 1px solid var(--border);
-      padding-bottom: 10px;
-      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
     }
-
-    .modal-body-text {
-      font-size: 14px;
-      line-height: 1.55;
-      white-space: pre-line;
-      margin-top: 8px;
+    .modal-body {
+      padding: 16px;
+      max-height: 75vh;
+      overflow-y: auto;
     }
-
-    .modal-img {
-      width: 100%;
-      max-height: 280px;
-      object-fit: cover;
-      border-radius: 8px;
-      margin: 8px 0;
-      border: 1px solid var(--border);
+    .modal-item {
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 14px;
+      margin-bottom: 14px;
     }
-
-    .toast {
-      position: fixed;
-      bottom: 16px;
-      right: 16px;
-      background: var(--text);
-      color: #fff;
-      padding: 9px 14px;
-      border-radius: 8px;
-      font-size: 12.5px;
-      font-weight: 600;
-      opacity: 0;
-      transform: translateY(8px);
-      transition: all 0.2s ease;
-      z-index: 80;
-      pointer-events: none;
-    }
-    .toast.show { opacity: 1; transform: translateY(0); }
-
-    .empty-box {
-      background: var(--surface);
-      border: 1px dashed var(--border);
-      border-radius: var(--radius);
-      padding: 24px;
-      text-align: center;
-      color: var(--muted);
-      font-size: 13.5px;
-    }
+    .modal-item:last-child { border-bottom: none; margin-bottom: 0; }
   </style>
 </head>
 <body>
-  <header class="topbar">
-    <div class="topbar-inner">
+  <header>
+    <div class="topbar">
       <div class="brand">
-        <span class="brand-badge">MonitorV3.2</span>
-        <div>
-          <h1>La Rioja · RSS &amp; Crawl</h1>
-          <div class="brand-sub" id="metaJurisdiccion">Cargando catálogo y noticias...</div>
-        </div>
+        <h1>MonitorV3.2 <span class="badge">La Rioja · RSS & Crawl</span></h1>
+        <p class="subtitle" id="subtituloEstado">Cargando catálogo y noticias...</p>
       </div>
-      <div class="toolbar">
-        <input id="buscador" class="search-input" type="search" placeholder="Buscar título, copete, cuerpo o fuente..." />
-        <button class="btn btn-primary" id="btnActualizarDemo">Actualizar ahora</button>
+      <div style="display:flex; gap:8px;">
+        <button class="btn" id="btnRecargar">Actualizar ahora</button>
       </div>
     </div>
-
-    <div class="tabs-wrap" id="tabsBar">
-      <button class="tab-btn active" data-tab="notas">Notas consolidadas</button>
-      <button class="tab-btn" data-tab="canales">Canales RSS y fuentes</button>
-      <button class="tab-btn" data-tab="vinculados">Contenido vinculado (Original)</button>
-      <button class="tab-btn" data-tab="taxonomias">Taxonomías y etiquetas</button>
-      <button class="tab-btn" data-tab="crud">CRUD de fuentes</button>
-    </div>
+    <nav class="tabs" id="navTabs">
+      <button class="tab active" data-tab="notas">Notas consolidadas</button>
+      <button class="tab" data-tab="fuentes">Canales RSS y fuentes</button>
+      <button class="tab" data-tab="vinculados">Contenido vinculado (Original)</button>
+      <button class="tab" data-tab="taxonomias">Taxonomías y etiquetas</button>
+      <button class="tab" data-tab="archivos">Archivos detectados</button>
+      <button class="tab" data-tab="crud">CRUD de fuentes</button>
+    </nav>
   </header>
 
-  <main class="container">
-    <section class="stats-strip" id="statsStrip"></section>
-    <div id="tabContent"></div>
+  <main>
+    <div class="alert" id="alertaSistema"></div>
+
+    <section class="kpis">
+      <div class="kpi"><strong id="kpiNotas">0</strong><span>Notas consolidadas</span></div>
+      <div class="kpi"><strong id="kpiFuentes">0/0</strong><span>Fuentes activas</span></div>
+      <div class="kpi"><strong id="kpiRss">0</strong><span>Canales RSS directos</span></div>
+      <div class="kpi"><strong id="kpiVinculados">0</strong><span>Contenidos vinculados</span></div>
+      <div class="kpi"><strong id="kpiArchivos">0</strong><span>Archivos detectados</span></div>
+    </section>
+
+    <section class="filters" id="barraFiltros">
+      <input type="search" id="inputBusqueda" class="search-box" placeholder="Buscar por título, palabra clave o fuente..." />
+      <div id="pillsTaxonomia" style="display:flex; flex-wrap:wrap; gap:6px;"></div>
+    </section>
+
+    <section id="vistaContenido"></section>
   </main>
 
-  <div class="modal-backdrop" id="modalBackdrop" role="dialog" aria-modal="true">
-    <div class="modal-box" id="modalBox"></div>
-  </div>
-
-  <div class="toast" id="toast"></div>
+  <dialog id="modalCanal">
+    <div class="modal-head">
+      <div>
+        <strong id="modalTitulo">Canal</strong>
+        <div id="modalSubtitulo" style="font-size:0.78rem; color:var(--muted);"></div>
+      </div>
+      <button class="btn btn-sm" id="btnCerrarModal">Cerrar</button>
+    </div>
+    <div class="modal-body" id="modalCuerpo"></div>
+  </dialog>
 
   <script>
     const state = {
       tab: "notas",
+      taxonomia: "Todas",
+      categoria: "Todas",
       busqueda: "",
-      taxonomiaFiltro: "Todas",
-      categoriaFuenteFiltro: "Todas",
-      etiquetaFiltro: "",
-      fuentesConfig: null,
-      noticiasData: null,
-      editandoId: null
+      fuentesConfig: { sitios: [], taxonomias: [] },
+      noticiasData: { notas: [], contenidos_vinculados: [], archivos_detectados: [] }
     };
 
-    function showToast(msg) {
-      const el = document.getElementById("toast");
-      el.textContent = msg;
-      el.classList.add("show");
-      clearTimeout(window._toastTimer);
-      window._toastTimer = setTimeout(() => el.classList.remove("show"), 2200);
-    }
-
-    function copiarTexto(texto, msg = "Contenido copiado") {
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(texto).then(() => showToast(msg)).catch(() => fallbackCopy(texto, msg));
-      } else {
-        fallbackCopy(texto, msg);
-      }
-    }
-
-    function fallbackCopy(texto, msg) {
-      const ta = document.createElement("textarea");
-      ta.value = texto;
-      document.body.appendChild(ta);
-      ta.select();
-      document.execCommand("copy");
-      document.body.removeChild(ta);
-      showToast(msg);
-    }
-
-    function escapeHtml(str) {
-      return String(str || "")
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;");
-    }
+    const STORAGE_KEY = "monitor_v3_fuentes_local";
 
     async function cargarDatos() {
+      const avisos = [];
+      let fuentesJson = { sitios: [], taxonomias: [] };
+      let noticiasJson = { notas: [], contenidos_vinculados: [], archivos_detectados: [] };
+
       try {
-        const [resFuentes, resNoticias] = await Promise.all([
-          fetch("data/monitor_v3_fuentes.json"),
-          fetch("data/monitor_v3_noticias.json")
-        ]);
-        if (resFuentes.ok) state.fuentesConfig = await resFuentes.json();
-        if (resNoticias.ok) state.noticiasData = await resNoticias.json();
-      } catch (_) {}
-
-      if (!state.fuentesConfig) {
-        state.fuentesConfig = {
-          version: "3.2.0-monitor-v3.2-larioja",
-          jurisdiccion: "Provincia de La Rioja, Argentina",
-          taxonomias: [
-            "Política y Gestión",
-            "Economía, Finanzas y Producción",
-            "Ciencia, Tecnología y Educación",
-            "Sociedad, Salud y Justicia",
-            "Normativa y Datos Oficiales",
-            "Cultura y Deportes"
-          ],
-          sitios: []
-        };
+        const resF = await fetch(`./data/monitor_v3_fuentes.json?v=${Date.now()}`, { cache: "no-store" });
+        if (!resF.ok) throw new Error(`HTTP ${resF.status}`);
+        fuentesJson = await resF.json();
+      } catch (e) {
+        avisos.push(`No se pudo cargar data/monitor_v3_fuentes.json (${e.message}).`);
       }
 
-      if (!state.noticiasData) {
-        state.noticiasData = {
-          version: "3.2.0-monitor-v3.2-larioja",
-          generado_utc: new Date().toISOString(),
-          jurisdiccion: state.fuentesConfig.jurisdiccion,
-          noticias: [],
-          contenidos_vinculados: []
-        };
+      try {
+        const resN = await fetch(`./data/monitor_v3_noticias.json?v=${Date.now()}`, { cache: "no-store" });
+        if (!resN.ok) throw new Error(`HTTP ${resN.status}`);
+        noticiasJson = await resN.json();
+      } catch (e) {
+        avisos.push(`No se pudo cargar data/monitor_v3_noticias.json (${e.message}).`);
       }
 
-      const totalSitios = (state.fuentesConfig.sitios || []).length;
-      const totalNotas = (state.noticiasData.noticias || []).length;
-      document.getElementById("metaJurisdiccion").textContent =
-        `${state.fuentesConfig.jurisdiccion} · ${totalSitios} fuentes · ${totalNotas} notas`;
-      render();
-    }
-
-    function getNoticiasFiltradas() {
-      const q = state.busqueda.trim().toLowerCase();
-      return (state.noticiasData.noticias || []).filter((n) => {
-        if (state.taxonomiaFiltro !== "Todas" && n.taxonomia !== state.taxonomiaFiltro) return false;
-        if (state.etiquetaFiltro && !(n.etiquetas || []).includes(state.etiquetaFiltro)) return false;
-        if (q) {
-          const blob = `${n.titulo || ""} ${n.copete || ""} ${n.cuerpo || ""} ${n.fuente || ""} ${n.taxonomia || ""} ${(n.etiquetas || []).join(" ")}`.toLowerCase();
-          if (!blob.includes(q)) return false;
-        }
-        return true;
-      });
-    }
-
-    function abrirModalNota(nota) {
-      const box = document.getElementById("modalBox");
-      const textoCopia = `${nota.titulo}
-
-${nota.copete}
-
-${nota.cuerpo}
-
-Fuente: ${nota.fuente} (${nota.url})`;
-      box.innerHTML = `
-        <div class="modal-head">
-          <div>
-            <div class="item-meta">
-              <span class="tag-chip">${escapeHtml(nota.taxonomia)}</span>
-              <span>${escapeHtml(nota.fuente)}</span>
-              <span>· ${escapeHtml(nota.canal || "RSS")}</span>
-            </div>
-            <h2 style="font-size:18px;">${escapeHtml(nota.titulo)}</h2>
-          </div>
-          <button class="btn" id="cerrarModalBtn">Cerrar</button>
-        </div>
-        ${nota.imagen ? `<img class="modal-img" src="${escapeHtml(nota.imagen)}" alt="${escapeHtml(nota.titulo)}" />` : ""}
-        <p style="font-weight:600; color:var(--muted); margin-bottom:8px;">${escapeHtml(nota.copete || "")}</p>
-        <div class="modal-body-text">${escapeHtml(nota.cuerpo || "")}</div>
-        <div class="item-actions" style="margin-top:14px;">
-          <button class="btn btn-primary" id="copiarNotaModalBtn">Copiar contenido completo</button>
-          <button class="btn" id="copiarEnlaceModalBtn">Copiar enlace</button>
-          ${nota.url ? `<a class="btn" href="${escapeHtml(nota.url)}" target="_blank" rel="noopener">Abrir original</a>` : ""}
-        </div>
-      `;
-      document.getElementById("modalBackdrop").classList.add("open");
-      document.getElementById("cerrarModalBtn").onclick = cerrarModal;
-      document.getElementById("copiarNotaModalBtn").onclick = () => copiarTexto(textoCopia, "Nota completa copiada");
-      document.getElementById("copiarEnlaceModalBtn").onclick = () => copiarTexto(nota.url || "", "Enlace copiado");
-    }
-
-    function abrirModalCanal(sitio) {
-      const box = document.getElementById("modalBox");
-      const todas = state.noticiasData.noticias || [];
-      let notasCanal = todas.filter((n) => (sitio.id && n.fuente_id === sitio.id) || n.fuente === sitio.nombre);
-
-      if (!notasCanal.length) {
-        notasCanal = [{
-          id: `live-${sitio.id}`,
-          fuente: sitio.nombre,
-          canal: sitio.usar_rss && sitio.url_rss ? "RSS" : "Crawl HTML",
-          titulo: `Último estado en ${sitio.nombre}`,
-          copete: `${sitio.categoria || ""} · ${sitio.subtipo || ""} · ${sitio.localidad || "La Rioja"}`,
-          cuerpo: `Canal monitoreado: ${sitio.url_web}
-Feed RSS: ${sitio.url_rss || "No configurado (rastreo HTML directo)"}
-Profundidad de crawl: ${sitio.crawl_profundidad || 3}`,
-          imagen: "",
-          url: sitio.url_web,
-          taxonomia: "Política y Gestión"
-        }];
+      const localOverride = localStorage.getItem(STORAGE_KEY);
+      if (localOverride) {
+        try {
+          const parsedLocal = JSON.parse(localOverride);
+          if (Array.isArray(parsedLocal.sitios) && parsedLocal.sitios.length) {
+            fuentesJson.sitios = parsedLocal.sitios;
+          }
+        } catch (_) {}
       }
 
-      const itemsHtml = notasCanal.map((n) => {
-        const textoItem = `${n.titulo}
+      state.fuentesConfig = fuentesJson;
+      state.noticiasData = noticiasJson;
 
-${n.copete || ""}
+      if ((noticiasJson.notas || []).length === 0 && avisos.length === 0) {
+        avisos.push("El catálogo está cargado, pero aún no hay notas recolectadas. Ejecuta el workflow en GitHub Actions (Run workflow).");
+      }
 
-${n.cuerpo || ""}
+      const alertaEl = document.getElementById("alertaSistema");
+      if (avisos.length) {
+        alertaEl.style.display = "block";
+        alertaEl.textContent = avisos.join(" ");
+      } else {
+        alertaEl.style.display = "none";
+      }
 
-${n.url || ""}`;
-        return `
-          <div class="item-card ${n.imagen ? "with-thumb" : ""}" style="margin-bottom:10px;">
-            <div>
-              <div class="item-meta">
-                <span class="tag-chip">${escapeHtml(n.taxonomia || "General")}</span>
-                <span>${escapeHtml(n.canal || "RSS")}</span>
-              </div>
-              <div class="item-title">${escapeHtml(n.titulo)}</div>
-              <div class="item-copete">${escapeHtml(n.copete || "")}</div>
-              <div class="item-cuerpo-preview">${escapeHtml(n.cuerpo || "")}</div>
-              <div class="item-actions">
-                <button class="btn btn-primary copy-canal-item" data-copy="${encodeURIComponent(textoItem)}">Copiar contenido</button>
-                ${n.url ? `<a class="btn" href="${escapeHtml(n.url)}" target="_blank" rel="noopener">Abrir nota</a>` : ""}
-              </div>
-            </div>
-            ${n.imagen ? `<img class="item-thumb" src="${escapeHtml(n.imagen)}" alt="${escapeHtml(n.titulo)}" />` : ""}
-          </div>
-        `;
-      }).join("");
-
-      box.innerHTML = `
-        <div class="modal-head">
-          <div>
-            <div class="item-meta">
-              <span class="tag-chip">${escapeHtml(sitio.categoria || "Fuente")}</span>
-              <span>${escapeHtml(sitio.localidad || "La Rioja")}</span>
-            </div>
-            <h2 style="font-size:18px;">${escapeHtml(sitio.nombre)}</h2>
-            <div style="font-size:12px; color:var(--muted); margin-top:2px;">
-              ${escapeHtml(sitio.url_rss || sitio.url_web || "")}
-            </div>
-          </div>
-          <button class="btn" id="cerrarModalBtn">Cerrar</button>
-        </div>
-        <div>${itemsHtml}</div>
-      `;
-
-      document.getElementById("modalBackdrop").classList.add("open");
-      document.getElementById("cerrarModalBtn").onclick = cerrarModal;
-      box.querySelectorAll(".copy-canal-item").forEach((btn) => {
-        btn.onclick = () => copiarTexto(decodeURIComponent(btn.dataset.copy), "Contenido de nota copiado");
-      });
+      actualizarKPIs();
+      renderFiltrosTaxonomia();
+      renderVista();
     }
 
-    function cerrarModal() {
-      document.getElementById("modalBackdrop").classList.remove("open");
-    }
-
-    function renderStats() {
+    function actualizarKPIs() {
       const sitios = state.fuentesConfig.sitios || [];
-      const activas = sitios.filter((s) => s.activo !== false).length;
-      const rssCount = sitios.filter((s) => s.usar_rss && s.url_rss).length;
-      const notas = state.noticiasData.noticias || [];
-      const vinculos = state.noticiasData.contenidos_vinculados || [];
-      const archivosCount = notas.reduce((acc, n) => acc + ((n.archivos && n.archivos.length) || 0), 0);
+      const activas = sitios.filter(s => s.activo !== false);
+      const rss = activas.filter(s => s.usar_rss && s.url_rss);
+      const notas = state.noticiasData.notas || [];
+      const vinculados = state.noticiasData.contenidos_vinculados || [];
+      const archivos = state.noticiasData.archivos_detectados || [];
 
-      document.getElementById("statsStrip").innerHTML = `
-        <div class="stat-card"><div class="stat-num">${notas.length}</div><div class="stat-lbl">Notas consolidadas</div></div>
-        <div class="stat-card"><div class="stat-num">${activas}/${sitios.length}</div><div class="stat-lbl">Fuentes activas</div></div>
-        <div class="stat-card"><div class="stat-num">${rssCount}</div><div class="stat-lbl">Canales RSS directos</div></div>
-        <div class="stat-card"><div class="stat-num">${vinculos.length}</div><div class="stat-lbl">Contenidos vinculados</div></div>
-        <div class="stat-card"><div class="stat-num">${archivosCount}</div><div class="stat-lbl">Archivos detectados</div></div>
-      `;
+      document.getElementById("kpiNotas").textContent = notas.length;
+      document.getElementById("kpiFuentes").textContent = `${activas.length}/${sitios.length}`;
+      document.getElementById("kpiRss").textContent = rss.length;
+      document.getElementById("kpiVinculados").textContent = vinculados.length;
+      document.getElementById("kpiArchivos").textContent = archivos.length;
+
+      const act = state.noticiasData.actualizado_local || state.fuentesConfig.actualizado || "Sin fecha";
+      document.getElementById("subtituloEstado").textContent =
+        `Provincia de La Rioja, Argentina · ${activas.length} fuentes activas · ${notas.length} notas · Act: ${act}`;
     }
 
-    function renderNotas(container) {
-      const taxonomias = ["Todas", ...(state.fuentesConfig.taxonomias || [])];
-      const pillsHtml = taxonomias.map((t) =>
-        `<button class="pill ${state.taxonomiaFiltro === t ? "active" : ""}" data-tax="${escapeHtml(t)}">${escapeHtml(t)}</button>`
-      ).join("");
+    function renderFiltrosTaxonomia() {
+      const cont = document.getElementById("pillsTaxonomia");
+      const taxes = ["Todas", ...(state.fuentesConfig.taxonomias || [
+        "Política y Gestión",
+        "Economía, Finanzas y Producción",
+        "Ciencia, Tecnología y Educación",
+        "Sociedad, Salud y Justicia",
+        "Normativa y Datos Oficiales",
+        "Cultura y Deportes"
+      ])];
 
-      const lista = getNoticiasFiltradas();
-      const cardsHtml = lista.length ? lista.map((n) => {
-        const archivosHtml = (n.archivos || []).map((a) =>
-          `<a class="file-badge" href="${escapeHtml(a.url)}" target="_blank" rel="noopener">${escapeHtml(a.extension)}: ${escapeHtml(a.nombre)}</a>`
-        ).join("");
-        const textoCopia = `${n.titulo}
-
-${n.copete || ""}
-
-${n.cuerpo || ""}
-
-${n.url || ""}`;
-
-        return `
-          <article class="item-card ${n.imagen ? "with-thumb" : ""}">
-            <div>
-              <div class="item-meta">
-                <button class="source-link abrir-fuente-btn" data-fuente="${escapeHtml(n.fuente)}">${escapeHtml(n.fuente)}</button>
-                <span>· ${escapeHtml(n.canal || "RSS")}</span>
-                <span class="tag-chip">${escapeHtml(n.taxonomia)}</span>
-                ${(n.etiquetas || []).slice(0, 3).map((e) => `<span>${escapeHtml(e)}</span>`).join("")}
-              </div>
-              <h3 class="item-title">${escapeHtml(n.titulo)}</h3>
-              <p class="item-copete">${escapeHtml(n.copete || "")}</p>
-              <div class="item-cuerpo-preview">${escapeHtml(n.cuerpo || "")}</div>
-              ${archivosHtml ? `<div class="files-row">${archivosHtml}</div>` : ""}
-              <div class="item-actions">
-                <button class="btn btn-primary ver-nota-btn" data-id="${escapeHtml(n.id)}">Leer completa</button>
-                <button class="btn copiar-nota-btn" data-copy="${encodeURIComponent(textoCopia)}">Copiar contenido</button>
-                <button class="btn copiar-enlace-btn" data-url="${escapeHtml(n.url || "")}">Copiar enlace</button>
-              </div>
-            </div>
-            ${n.imagen ? `<img class="item-thumb" src="${escapeHtml(n.imagen)}" alt="${escapeHtml(n.titulo)}" />` : ""}
-          </article>
-        `;
-      }).join("") : `<div class="empty-box">No hay notas que coincidan con el filtro actual.</div>`;
-
-      container.innerHTML = `
-        <div class="pills-row">${pillsHtml}</div>
-        ${state.etiquetaFiltro ? `<div style="margin-bottom:10px;"><button class="pill active" id="limpiarEtqBtn">Etiqueta: ${escapeHtml(state.etiquetaFiltro)} ✕</button></div>` : ""}
-        <div class="feed-list">${cardsHtml}</div>
-      `;
-
-      container.querySelectorAll(".pill[data-tax]").forEach((p) => {
-        p.onclick = () => {
-          state.taxonomiaFiltro = p.dataset.tax;
-          render();
-        };
-      });
-      const limBtn = document.getElementById("limpiarEtqBtn");
-      if (limBtn) limBtn.onclick = () => { state.etiquetaFiltro = ""; render(); };
-
-      container.querySelectorAll(".abrir-fuente-btn").forEach((b) => {
-        b.onclick = () => {
-          const sitio = (state.fuentesConfig.sitios || []).find((s) => s.nombre === b.dataset.fuente);
-          if (sitio) abrirModalCanal(sitio);
-        };
-      });
-      container.querySelectorAll(".ver-nota-btn").forEach((b) => {
-        b.onclick = () => {
-          const nota = (state.noticiasData.noticias || []).find((x) => x.id === b.dataset.id);
-          if (nota) abrirModalNota(nota);
-        };
-      });
-      container.querySelectorAll(".copiar-nota-btn").forEach((b) => {
-        b.onclick = () => copiarTexto(decodeURIComponent(b.dataset.copy), "Contenido copiado");
-      });
-      container.querySelectorAll(".copiar-enlace-btn").forEach((b) => {
-        b.onclick = () => copiarTexto(b.dataset.url, "Enlace copiado");
-      });
-    }
-
-    function renderCanales(container) {
-      const sitios = state.fuentesConfig.sitios || [];
-      const categorias = ["Todas", ...Array.from(new Set(sitios.map((s) => s.categoria).filter(Boolean)))];
-      const q = state.busqueda.trim().toLowerCase();
-
-      const pillsHtml = categorias.map((c) =>
-        `<button class="pill ${state.categoriaFuenteFiltro === c ? "active" : ""}" data-cat="${escapeHtml(c)}">${escapeHtml(c)}</button>`
-      ).join("");
-
-      const filtrados = sitios.filter((s) => {
-        if (state.categoriaFuenteFiltro !== "Todas" && s.categoria !== state.categoriaFuenteFiltro) return false;
-        if (q) {
-          const blob = `${s.nombre} ${s.categoria} ${s.subtipo} ${s.localidad} ${s.url_web} ${s.url_rss}`.toLowerCase();
-          if (!blob.includes(q)) return false;
-        }
-        return true;
-      });
-
-      const cards = filtrados.map((s) => `
-        <div class="channel-card">
-          <div>
-            <div class="item-meta">
-              <span class="status-pill ${s.activo !== false ? "status-on" : "status-off"}">${s.activo !== false ? "Activa" : "Pausada"}</span>
-              <span>${escapeHtml(s.categoria || "")}</span>
-              <span>· ${escapeHtml(s.localidad || "La Rioja")}</span>
-            </div>
-            <button class="source-link abrir-canal-modal" data-id="${escapeHtml(s.id)}" style="font-size:15px; display:block; margin-bottom:4px;">
-              ${escapeHtml(s.nombre)}
-            </button>
-            <div style="font-size:12px; color:var(--muted);">${escapeHtml(s.subtipo || "")}</div>
-            <div style="font-size:11.5px; color:var(--muted); margin-top:4px; word-break:break-all;">
-              ${escapeHtml(s.url_rss || s.url_web || "")}
-            </div>
-          </div>
-          <div class="item-actions">
-            <button class="btn btn-primary abrir-canal-modal" data-id="${escapeHtml(s.id)}">Ver noticias del canal</button>
-            <button class="btn copiar-canal-url" data-url="${escapeHtml(s.url_rss || s.url_web || "")}">Copiar URL</button>
-          </div>
-        </div>
+      cont.innerHTML = taxes.map(t => `
+        <button class="pill ${state.taxonomia === t ? "active" : ""}" data-tax="${t}">${t}</button>
       `).join("");
 
-      container.innerHTML = `
-        <div class="pills-row">${pillsHtml}</div>
-        <div class="channels-grid">${cards || '<div class="empty-box">Sin fuentes en esta categoría.</div>'}</div>
-      `;
-
-      container.querySelectorAll(".pill[data-cat]").forEach((p) => {
-        p.onclick = () => {
-          state.categoriaFuenteFiltro = p.dataset.cat;
-          render();
-        };
-      });
-      container.querySelectorAll(".abrir-canal-modal").forEach((b) => {
-        b.onclick = () => {
-          const sitio = sitios.find((x) => x.id === b.dataset.id);
-          if (sitio) abrirModalCanal(sitio);
-        };
-      });
-      container.querySelectorAll(".copiar-canal-url").forEach((b) => {
-        b.onclick = () => copiarTexto(b.dataset.url, "URL copiada");
+      cont.querySelectorAll(".pill").forEach(btn => {
+        btn.addEventListener("click", () => {
+          state.taxonomia = btn.dataset.tax;
+          renderFiltrosTaxonomia();
+          renderVista();
+        });
       });
     }
 
-    function renderVinculados(container) {
-      const vinculos = state.noticiasData.contenidos_vinculados || [];
-      if (!vinculos.length) {
-        container.innerHTML = `<div class="empty-box">No hay contenidos vinculados generados todavía.</div>`;
+    function copiarTexto(texto, btn) {
+      navigator.clipboard.writeText(texto).then(() => {
+        if (btn) {
+          const orig = btn.textContent;
+          btn.textContent = "Copiado";
+          setTimeout(() => { btn.textContent = orig; }, 1300);
+        }
+      });
+    }
+
+    function abrirModalFuente(fuenteId, fuenteNombre) {
+      const modal = document.getElementById("modalCanal");
+      const notas = (state.noticiasData.notas || []).filter(
+        n => n.fuente_id === fuenteId || n.fuente_nombre === fuenteNombre
+      );
+      const sitio = (state.fuentesConfig.sitios || []).find(
+        s => s.id === fuenteId || s.nombre === fuenteNombre
+      );
+
+      document.getElementById("modalTitulo").textContent = fuenteNombre || (sitio && sitio.nombre) || "Fuente";
+      document.getElementById("modalSubtitulo").textContent = sitio
+        ? `${sitio.categoria} · ${sitio.localidad || "La Rioja"} · ${notas.length} notas en catálogo`
+        : `${notas.length} notas recolectadas`;
+
+      const cuerpo = document.getElementById("modalCuerpo");
+      if (!notas.length) {
+        cuerpo.innerHTML = `<div class="empty">Aún no hay notas consolidadas para esta fuente.${
+          sitio && sitio.ultimo_error ? `<br><small>Último estado: ${sitio.ultimo_error}</small>` : ""
+        }</div>`;
+      } else {
+        cuerpo.innerHTML = notas.map(n => `
+          <div class="modal-item">
+            <div class="meta">
+              <span class="badge">${n.taxonomia}</span>
+              <span>${n.fecha || ""}</span>
+            </div>
+            <h4 style="margin:4px 0 6px;">${n.titulo}</h4>
+            ${n.imagen ? `<img src="${n.imagen}" alt="" style="width:100%;max-height:220px;object-fit:cover;border-radius:8px;margin-bottom:8px;">` : ""}
+            <p style="font-size:0.86rem;color:#334155;white-space:pre-line;">${n.cuerpo || n.copete || ""}</p>
+            <div style="display:flex;gap:8px;margin-top:8px;">
+              <a class="btn btn-sm btn-primary" href="${n.url}" target="_blank" rel="noopener">Abrir original</a>
+              <button class="btn btn-sm" onclick="copiarTexto(${JSON.stringify(n.titulo + '\n\n' + (n.cuerpo || n.copete) + '\n' + n.url)}, this)">Copiar texto</button>
+            </div>
+          </div>
+        `).join("");
+      }
+      modal.showModal();
+    }
+
+    function filtrarNotas() {
+      const q = state.busqueda.trim().toLowerCase();
+      return (state.noticiasData.notas || []).filter(n => {
+        const okTax = state.taxonomia === "Todas" || n.taxonomia === state.taxonomia;
+        const okQ = !q || [n.titulo, n.copete, n.cuerpo, n.fuente_nombre, ...(n.etiquetas || [])]
+          .join(" ").toLowerCase().includes(q);
+        return okTax && okQ;
+      });
+    }
+
+    function renderVista() {
+      const cont = document.getElementById("vistaContenido");
+      const barra = document.getElementById("barraFiltros");
+      barra.style.display = ["notas", "vinculados", "taxonomias"].includes(state.tab) ? "flex" : "none";
+
+      if (state.tab === "notas") {
+        const notas = filtrarNotas();
+        if (!notas.length) {
+          cont.innerHTML = `<div class="empty">No hay notas que coincidan con el filtro actual.</div>`;
+          return;
+        }
+        cont.innerHTML = `<div class="grid">${notas.map(n => `
+          <article class="card">
+            <div>
+              ${n.imagen ? `<img src="${n.imagen}" alt="" loading="lazy" onerror="this.style.display='none'">` : ""}
+              <div class="card-body">
+                <div class="meta">
+                  <span class="source-link" onclick="abrirModalFuente('${n.fuente_id}', ${JSON.stringify(n.fuente_nombre)})">${n.fuente_nombre}</span>
+                  <span>·</span>
+                  <span>${n.taxonomia}</span>
+                </div>
+                <h3>${n.titulo}</h3>
+                <p>${(n.copete || n.cuerpo || "").slice(0, 220)}${(n.copete || n.cuerpo || "").length > 220 ? "..." : ""}</p>
+                <div class="tags">${(n.etiquetas || []).map(t => `<span class="tag">#${t}</span>`).join("")}</div>
+              </div>
+            </div>
+            <div class="card-actions">
+              <a class="btn btn-sm btn-primary" href="${n.url}" target="_blank" rel="noopener">Abrir nota</a>
+              <button class="btn btn-sm" onclick="abrirModalFuente('${n.fuente_id}', ${JSON.stringify(n.fuente_nombre)})">Ver canal</button>
+              <button class="btn btn-sm" onclick="copiarTexto(${JSON.stringify(n.titulo + '\n\n' + (n.cuerpo || n.copete) + '\n' + n.url)}, this)">Copiar contenido</button>
+            </div>
+          </article>
+        `).join("")}</div>`;
         return;
       }
 
-      container.innerHTML = `<div class="feed-list">${vinculos.map((v) => {
-        const textoCopia = `${v.titulo_original}
-
-${v.copete}
-
-${v.cuerpo_original}
-
-Fuentes: ${(v.fuentes_vinculadas || []).join(", ")}`;
-        const refsHtml = (v.notas_referenciadas || []).map((r) =>
-          `<div style="font-size:12px; margin-top:4px;">• <strong>${escapeHtml(r.fuente)}:</strong> <a href="${escapeHtml(r.url)}" target="_blank" rel="noopener">${escapeHtml(r.titulo)}</a></div>`
-        ).join("");
-
-        return `
-          <article class="item-card">
-            <div>
-              <div class="item-meta">
-                <span class="tag-chip">${escapeHtml(v.taxonomia)}</span>
-                <span>${(v.fuentes_vinculadas || []).length} fuente(s) cruzada(s)</span>
+      if (state.tab === "fuentes") {
+        const sitios = state.fuentesConfig.sitios || [];
+        const cats = ["Todas", ...new Set(sitios.map(s => s.categoria))];
+        const filtrados = sitios.filter(s => state.categoria === "Todas" || s.categoria === state.categoria);
+        cont.innerHTML = `
+          <div class="filters">
+            ${cats.map(c => `<button class="pill ${state.categoria === c ? "active" : ""}" data-cat="${c}">${c}</button>`).join("")}
+          </div>
+          <div class="grid">${filtrados.map(s => `
+            <article class="card">
+              <div class="card-body">
+                <div class="meta">
+                  <span class="badge">${s.categoria}</span>
+                  <span>${s.localidad || "La Rioja"}</span>
+                </div>
+                <h3><span class="source-link" onclick="abrirModalFuente('${s.id}', ${JSON.stringify(s.nombre)})">${s.nombre}</span></h3>
+                <p style="font-size:0.8rem;color:var(--muted);">${s.subtipo || ""} · ${s.usar_rss ? "RSS + Crawl" : "Crawl HTML"}</p>
+                <div class="meta">
+                  <span class="${s.estado_ultima_corrida === 'error' ? 'status-err' : 'status-ok'}">
+                    Estado: ${s.estado_ultima_corrida || "pendiente"} ${s.http_status ? `(HTTP ${s.http_status})` : ""}
+                  </span>
+                  <span>· Notas: ${s.notas_recolectadas ?? 0}</span>
+                </div>
               </div>
-              <h3 class="item-title">${escapeHtml(v.titulo_original)}</h3>
-              <p class="item-copete">${escapeHtml(v.copete || "")}</p>
-              <div class="item-cuerpo-preview" style="max-height:none;">${escapeHtml(v.cuerpo_original || "")}</div>
-              ${refsHtml ? `<div style="margin-bottom:8px;">${refsHtml}</div>` : ""}
-              <div class="item-actions">
-                <button class="btn btn-primary copiar-vinculo-btn" data-copy="${encodeURIComponent(textoCopia)}">Copiar contenido original</button>
+              <div class="card-actions">
+                <button class="btn btn-sm btn-primary" onclick="abrirModalFuente('${s.id}', ${JSON.stringify(s.nombre)})">Ver notas (Modal)</button>
+                <a class="btn btn-sm" href="${s.url_web}" target="_blank" rel="noopener">Web</a>
+                ${s.url_rss ? `<a class="btn btn-sm" href="${s.url_rss}" target="_blank" rel="noopener">RSS</a>` : ""}
               </div>
-            </div>
-          </article>
+            </article>
+          `).join("")}</div>
         `;
-      }).join("")}</div>`;
-
-      container.querySelectorAll(".copiar-vinculo-btn").forEach((b) => {
-        b.onclick = () => copiarTexto(decodeURIComponent(b.dataset.copy), "Contenido vinculado copiado");
-      });
-    }
-
-    function renderTaxonomias(container) {
-      const notas = state.noticiasData.noticias || [];
-      const porTax = {};
-      (state.fuentesConfig.taxonomias || []).forEach((t) => { porTax[t] = 0; });
-      const etiquetasCount = {};
-
-      notas.forEach((n) => {
-        porTax[n.taxonomia] = (porTax[n.taxonomia] || 0) + 1;
-        (n.etiquetas || []).forEach((et) => {
-          etiquetasCount[et] = (etiquetasCount[et] || 0) + 1;
-        });
-      });
-
-      const taxHtml = Object.entries(porTax).map(([tax, cant]) => `
-        <div class="channel-card">
-          <div>
-            <div class="item-title">${escapeHtml(tax)}</div>
-            <div style="font-size:12.5px; color:var(--muted);">${cant} nota(s) clasificada(s)</div>
-          </div>
-          <button class="btn btn-primary filtrar-desde-tax" data-tax="${escapeHtml(tax)}">Filtrar notas</button>
-        </div>
-      `).join("");
-
-      const etqOrdenadas = Object.entries(etiquetasCount).sort((a, b) => b[1] - a[1]);
-      const etqHtml = etqOrdenadas.map(([et, cnt]) =>
-        `<button class="pill filtrar-desde-etq" data-etq="${escapeHtml(et)}">${escapeHtml(et)} (${cnt})</button>`
-      ).join("");
-
-      container.innerHTML = `
-        <h2 style="font-size:15px; margin-bottom:10px;">Taxonomías temáticas</h2>
-        <div class="channels-grid" style="margin-bottom:18px;">${taxHtml}</div>
-        <h2 style="font-size:15px; margin-bottom:10px;">Etiquetas del día</h2>
-        <div class="pills-row" style="flex-wrap:wrap;">${etqHtml || '<span style="font-size:12.5px; color:var(--muted);">Sin etiquetas aún.</span>'}</div>
-      `;
-
-      container.querySelectorAll(".filtrar-desde-tax").forEach((b) => {
-        b.onclick = () => {
-          state.taxonomiaFiltro = b.dataset.tax;
-          state.etiquetaFiltro = "";
-          state.tab = "notas";
-          render();
-        };
-      });
-      container.querySelectorAll(".filtrar-desde-etq").forEach((b) => {
-        b.onclick = () => {
-          state.etiquetaFiltro = b.dataset.etq;
-          state.taxonomiaFiltro = "Todas";
-          state.tab = "notas";
-          render();
-        };
-      });
-    }
-
-    function renderCrud(container) {
-      const sitios = state.fuentesConfig.sitios || [];
-      const editItem = state.editandoId ? sitios.find((s) => s.id === state.editandoId) : null;
-
-      container.innerHTML = `
-        <form class="crud-form" id="crudForm">
-          <div class="field">
-            <label>Nombre de la fuente</label>
-            <input type="text" id="fNombre" required value="${escapeHtml(editItem ? editItem.nombre : "")}" placeholder="Ej: Portal La Rioja" />
-          </div>
-          <div class="field">
-            <label>Categoría</label>
-            <input type="text" id="fCategoria" required value="${escapeHtml(editItem ? editItem.categoria : "Medios de Comunicación")}" />
-          </div>
-          <div class="field">
-            <label>Subtipo</label>
-            <input type="text" id="fSubtipo" value="${escapeHtml(editItem ? editItem.subtipo : "Portal Digital")}" />
-          </div>
-          <div class="field">
-            <label>Localidad</label>
-            <input type="text" id="fLocalidad" value="${escapeHtml(editItem ? editItem.localidad : "La Rioja Capital")}" />
-          </div>
-          <div class="field">
-            <label>URL Web</label>
-            <input type="url" id="fUrlWeb" required value="${escapeHtml(editItem ? editItem.url_web : "")}" placeholder="https://..." />
-          </div>
-          <div class="field">
-            <label>URL RSS (opcional)</label>
-            <input type="url" id="fUrlRss" value="${escapeHtml(editItem ? editItem.url_rss : "")}" placeholder="https://.../feed/" />
-          </div>
-          <div class="field">
-            <label>Profundidad de crawl</label>
-            <input type="number" id="fProf" min="1" max="5" value="${editItem ? (editItem.crawl_profundidad || 3) : 3}" />
-          </div>
-          <div class="field">
-            <label>Modo de recolección</label>
-            <select id="fUsarRss">
-              <option value="true" ${editItem && editItem.usar_rss ? "selected" : ""}>Priorizar RSS + fallback HTML</option>
-              <option value="false" ${editItem && !editItem.usar_rss ? "selected" : ""}>Crawl HTML directo</option>
-            </select>
-          </div>
-          <div style="grid-column: 1 / -1; display:flex; flex-wrap:wrap; gap:8px; align-items:center;">
-            <button class="btn btn-primary" type="submit">${editItem ? "Guardar cambios" : "Agregar fuente"}</button>
-            ${editItem ? '<button class="btn" type="button" id="cancelarEditBtn">Cancelar edición</button>' : ""}
-            <button class="btn" type="button" id="exportarFuentesBtn">Descargar monitor_v3_fuentes.json</button>
-          </div>
-        </form>
-
-        <div class="feed-list">
-          ${sitios.map((s) => `
-            <div class="item-card">
-              <div>
-                <div class="item-meta">
-                  <span class="status-pill ${s.activo !== false ? "status-on" : "status-off"}">${s.activo !== false ? "Activa" : "Pausada"}</span>
-                  <span>${escapeHtml(s.categoria || "")}</span>
-                  <span>· ${escapeHtml(s.localidad || "")}</span>
-                </div>
-                <div class="item-title">${escapeHtml(s.nombre)}</div>
-                <div style="font-size:12px; color:var(--muted); word-break:break-all;">
-                  Web: ${escapeHtml(s.url_web || "")} ${s.url_rss ? `| RSS: ${escapeHtml(s.url_rss)}` : ""}
-                </div>
-              </div>
-              <div class="item-actions">
-                <button class="btn crud-edit" data-id="${escapeHtml(s.id)}">Editar</button>
-                <button class="btn crud-toggle" data-id="${escapeHtml(s.id)}">${s.activo !== false ? "Pausar" : "Activar"}</button>
-                <button class="btn btn-danger crud-del" data-id="${escapeHtml(s.id)}">Eliminar</button>
-              </div>
-            </div>
-          `).join("")}
-        </div>
-      `;
-
-      document.getElementById("crudForm").onsubmit = (e) => {
-        e.preventDefault();
-        const payload = {
-          nombre: document.getElementById("fNombre").value.trim(),
-          categoria: document.getElementById("fCategoria").value.trim(),
-          subtipo: document.getElementById("fSubtipo").value.trim(),
-          localidad: document.getElementById("fLocalidad").value.trim(),
-          url_web: document.getElementById("fUrlWeb").value.trim(),
-          url_rss: document.getElementById("fUrlRss").value.trim(),
-          crawl_profundidad: Number(document.getElementById("fProf").value || 3),
-          usar_rss: document.getElementById("fUsarRss").value === "true",
-          tema_por_defecto: "",
-          activo: editItem ? editItem.activo !== false : true
-        };
-
-        if (editItem) {
-          Object.assign(editItem, payload);
-          state.editandoId = null;
-          showToast("Fuente actualizada");
-        } else {
-          const slug = payload.nombre.toLowerCase().replace(/[^a-z0-9]+/g, "-").slice(0, 20);
-          state.fuentesConfig.sitios.push({
-            id: `lr-custom-${slug}-${Date.now().toString().slice(-4)}`,
-            ...payload
+        cont.querySelectorAll("[data-cat]").forEach(btn => {
+          btn.addEventListener("click", () => {
+            state.categoria = btn.dataset.cat;
+            renderVista();
           });
-          showToast("Fuente agregada al catálogo");
-        }
-        render();
-      };
-
-      const cancelBtn = document.getElementById("cancelarEditBtn");
-      if (cancelBtn) {
-        cancelBtn.onclick = () => {
-          state.editandoId = null;
-          render();
-        };
+        });
+        return;
       }
 
-      document.getElementById("exportarFuentesBtn").onclick = () => {
-        const blob = new Blob([JSON.stringify(state.fuentesConfig, null, 2)], { type: "application/json" });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = "monitor_v3_fuentes.json";
-        a.click();
-        URL.revokeObjectURL(url);
-        showToast("monitor_v3_fuentes.json descargado");
-      };
+      if (state.tab === "vinculados") {
+        const lista = (state.noticiasData.contenidos_vinculados || []).filter(
+          v => state.taxonomia === "Todas" || v.taxonomia === state.taxonomia
+        );
+        if (!lista.length) {
+          cont.innerHTML = `<div class="empty">Aún no hay contenidos vinculados generados para esta selección.</div>`;
+          return;
+        }
+        cont.innerHTML = `<div class="grid">${lista.map(v => `
+          <article class="card">
+            <div class="card-body">
+              <div class="meta"><span class="badge">${v.taxonomia}</span><span>${v.total_notas} notas cruzadas</span></div>
+              <h3>${v.titulo_original}</h3>
+              <p>${v.copete}</p>
+              <p style="white-space:pre-line;font-size:0.82rem;">${v.cuerpo_original}</p>
+            </div>
+            <div class="card-actions">
+              <button class="btn btn-sm btn-primary" onclick="copiarTexto(${JSON.stringify(v.titulo_original + '\n\n' + v.cuerpo_original)}, this)">Copiar síntesis</button>
+            </div>
+          </article>
+        `).join("")}</div>`;
+        return;
+      }
 
-      container.querySelectorAll(".crud-edit").forEach((b) => {
-        b.onclick = () => {
-          state.editandoId = b.dataset.id;
-          render();
-        };
-      });
-      container.querySelectorAll(".crud-toggle").forEach((b) => {
-        b.onclick = () => {
-          const item = sitios.find((x) => x.id === b.dataset.id);
-          if (item) {
-            item.activo = item.activo === false ? true : false;
-            render();
-            showToast(item.activo ? "Fuente activada" : "Fuente pausada");
-          }
-        };
-      });
-      container.querySelectorAll(".crud-del").forEach((b) => {
-        b.onclick = () => {
-          state.fuentesConfig.sitios = sitios.filter((x) => x.id !== b.dataset.id);
-          if (state.editandoId === b.dataset.id) state.editandoId = null;
-          render();
-          showToast("Fuente eliminada");
-        };
+      if (state.tab === "taxonomias") {
+        const notas = state.noticiasData.notas || [];
+        const taxes = state.fuentesConfig.taxonomias || [];
+        const tagCounts = {};
+        notas.forEach(n => (n.etiquetas || []).forEach(t => { tagCounts[t] = (tagCounts[t] || 0) + 1; }));
+        const topTags = Object.entries(tagCounts).sort((a, b) => b[1] - a[1]).slice(0, 30);
+
+        cont.innerHTML = `
+          <div class="grid" style="margin-bottom:16px;">
+            ${taxes.map(t => {
+              const count = notas.filter(n => n.taxonomia === t).length;
+              return `
+                <div class="card" style="cursor:pointer;" onclick="state.taxonomia=${JSON.stringify(t)};state.tab='notas';actualizarTabs();renderFiltrosTaxonomia();renderVista();">
+                  <div class="card-body">
+                    <h3>${t}</h3>
+                    <p>${count} notas clasificadas</p>
+                  </div>
+                </div>
+              `;
+            }).join("")}
+          </div>
+          <div class="card">
+            <div class="card-body">
+              <h3>Etiquetas destacadas del día</h3>
+              <div class="tags">
+                ${topTags.length ? topTags.map(([tag, c]) => `
+                  <button class="pill" onclick="state.busqueda=${JSON.stringify(tag)};document.getElementById('inputBusqueda').value=${JSON.stringify(tag)};state.tab='notas';actualizarTabs();renderVista();">#${tag} (${c})</button>
+                `).join("") : "<span style='color:var(--muted);font-size:0.84rem;'>Sin etiquetas recolectadas aún.</span>"}
+              </div>
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      if (state.tab === "archivos") {
+        const archivos = state.noticiasData.archivos_detectados || [];
+        if (!archivos.length) {
+          cont.innerHTML = `<div class="empty">No se han detectado archivos adjuntos (PDF, CSV, XLSX, SHP, ZIP, etc.) todavía.</div>`;
+          return;
+        }
+        cont.innerHTML = `<div class="grid">${archivos.map(a => `
+          <article class="card">
+            <div class="card-body">
+              <div class="meta"><span class="badge">${a.extension}</span><span>${a.fuente_nombre}</span></div>
+              <h3>${a.titulo}</h3>
+            </div>
+            <div class="card-actions">
+              <a class="btn btn-sm btn-primary" href="${a.url}" target="_blank" rel="noopener">Descargar / Abrir</a>
+              <button class="btn btn-sm" onclick="copiarTexto(${JSON.stringify(a.url)}, this)">Copiar enlace</button>
+            </div>
+          </article>
+        `).join("")}</div>`;
+        return;
+      }
+
+      if (state.tab === "crud") {
+        const sitios = state.fuentesConfig.sitios || [];
+        cont.innerHTML = `
+          <form class="crud-form" id="formNuevoSitio">
+            <input type="text" id="crudNombre" placeholder="Nombre de la fuente *" required />
+            <select id="crudCategoria">
+              <option value="Medios de Comunicación">Medios de Comunicación</option>
+              <option value="Entidades e Instituciones Gubernamentales">Entidades e Instituciones Gubernamentales</option>
+              <option value="Universidades">Universidades</option>
+              <option value="Centros de Investigación">Centros de Investigación</option>
+            </select>
+            <input type="text" id="crudLocalidad" placeholder="Localidad (ej. La Rioja Capital)" value="La Rioja Capital" />
+            <input type="url" id="crudWeb" placeholder="URL Web (https://...) *" required />
+            <input type="url" id="crudRss" placeholder="URL RSS (opcional)" />
+            <button type="submit" class="btn btn-primary">Agregar fuente</button>
+          </form>
+          <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
+            <button class="btn btn-primary" id="btnExportarJson">Descargar monitor_v3_fuentes.json</button>
+            <button class="btn" id="btnResetLocal">Restaurar catálogo del repositorio</button>
+          </div>
+          <div class="grid">
+            ${sitios.map((s, idx) => `
+              <article class="card">
+                <div class="card-body">
+                  <div class="meta"><span class="badge">${s.categoria}</span><span>${s.activo ? "Activa" : "Pausada"}</span></div>
+                  <h3>${s.nombre}</h3>
+                  <p style="font-size:0.78rem;word-break:break-all;">${s.url_web}</p>
+                </div>
+                <div class="card-actions">
+                  <button class="btn btn-sm" onclick="toggleSitio(${idx})">${s.activo ? "Pausar" : "Activar"}</button>
+                  <button class="btn btn-sm" onclick="eliminarSitio(${idx})">Eliminar</button>
+                </div>
+              </article>
+            `).join("")}
+          </div>
+        `;
+
+        document.getElementById("formNuevoSitio").addEventListener("submit", e => {
+          e.preventDefault();
+          const nombre = document.getElementById("crudNombre").value.trim();
+          const categoria = document.getElementById("crudCategoria").value;
+          const localidad = document.getElementById("crudLocalidad").value.trim() || "La Rioja Capital";
+          const url_web = document.getElementById("crudWeb").value.trim();
+          const url_rss = document.getElementById("crudRss").value.trim();
+          state.fuentesConfig.sitios.unshift({
+            id: `lr-custom-${Date.now().toString(36)}`,
+            nombre,
+            categoria,
+            subtipo: "Fuente personalizada",
+            localidad,
+            url_web,
+            url_rss,
+            usar_rss: Boolean(url_rss),
+            crawl_profundidad: 3,
+            tema_por_defecto: "",
+            activo: true
+          });
+          guardarLocal();
+          actualizarKPIs();
+          renderVista();
+        });
+
+        document.getElementById("btnExportarJson").addEventListener("click", () => {
+          const blob = new Blob([JSON.stringify(state.fuentesConfig, null, 2)], { type: "application/json" });
+          const a = document.createElement("a");
+          a.href = URL.createObjectURL(blob);
+          a.download = "monitor_v3_fuentes.json";
+          a.click();
+        });
+
+        document.getElementById("btnResetLocal").addEventListener("click", () => {
+          localStorage.removeItem(STORAGE_KEY);
+          cargarDatos();
+        });
+      }
+    }
+
+    function guardarLocal() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state.fuentesConfig));
+    }
+
+    function toggleSitio(idx) {
+      state.fuentesConfig.sitios[idx].activo = !state.fuentesConfig.sitios[idx].activo;
+      guardarLocal();
+      actualizarKPIs();
+      renderVista();
+    }
+
+    function eliminarSitio(idx) {
+      state.fuentesConfig.sitios.splice(idx, 1);
+      guardarLocal();
+      actualizarKPIs();
+      renderVista();
+    }
+
+    function actualizarTabs() {
+      document.querySelectorAll(".tab").forEach(t => {
+        t.classList.toggle("active", t.dataset.tab === state.tab);
       });
     }
 
-    function render() {
-      document.querySelectorAll(".tab-btn").forEach((btn) => {
-        btn.classList.toggle("active", btn.dataset.tab === state.tab);
+    document.querySelectorAll(".tab").forEach(t => {
+      t.addEventListener("click", () => {
+        state.tab = t.dataset.tab;
+        actualizarTabs();
+        renderVista();
       });
-      renderStats();
-      const content = document.getElementById("tabContent");
-      if (state.tab === "notas") renderNotas(content);
-      else if (state.tab === "canales") renderCanales(content);
-      else if (state.tab === "vinculados") renderVinculados(content);
-      else if (state.tab === "taxonomias") renderTaxonomias(content);
-      else if (state.tab === "crud") renderCrud(content);
-    }
-
-    document.querySelectorAll(".tab-btn").forEach((btn) => {
-      btn.onclick = () => {
-        state.tab = btn.dataset.tab;
-        render();
-      };
     });
 
-    document.getElementById("buscador").oninput = (e) => {
+    document.getElementById("inputBusqueda").addEventListener("input", e => {
       state.busqueda = e.target.value;
-      render();
-    };
+      renderVista();
+    });
 
-    document.getElementById("btnActualizarDemo").onclick = () => {
-      cargarDatos().then(() => showToast("Vista sincronizada"));
-    };
-
-    document.getElementById("modalBackdrop").onclick = (e) => {
-      if (e.target.id === "modalBackdrop") cerrarModal();
-    };
+    document.getElementById("btnRecargar").addEventListener("click", cargarDatos);
+    document.getElementById("btnCerrarModal").addEventListener("click", () => {
+      document.getElementById("modalCanal").close();
+    });
 
     cargarDatos();
   </script>
