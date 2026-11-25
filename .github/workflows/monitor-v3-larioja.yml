@@ -1,4 +1,4 @@
-name: MonitorV3.1 Crawl y RSS La Rioja (Node 24 / 3x al dia)
+name: MonitorV3.1 (Node 24 / 3x al dia)
 
 env:
 FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
