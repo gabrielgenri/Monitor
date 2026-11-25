@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""MonitorV3.1 - Recolector hibrido RSS/Atom + Crawl HTML sin recorte de contenido."""
+"""MonitorV3.2 - Recolector hibrido RSS/Atom + Crawl HTML sin recorte de contenido."""
 
 from __future__ import annotations
 
@@ -24,7 +24,7 @@ FUENTES_PATH = os.path.join(BASE_DIR, "data", "monitor_v3_fuentes.json")
 NOTICIAS_PATH = os.path.join(BASE_DIR, "data", "monitor_v3_noticias.json")
 
 HEADERS = {
-    "User-Agent": "MonitorV3.1-LaRioja/3.1 (+https://github.com/) Mozilla/5.0",
+    "User-Agent": "MonitorV3.2-LaRioja/3.2 (+https://github.com/) Mozilla/5.0",
     "Accept": "application/rss+xml, application/atom+xml, application/xml, text/xml, text/html;q=0.9, */*;q=0.8",
 }
 
@@ -265,7 +265,7 @@ def construir_contenidos_vinculados(noticias: list[dict[str, Any]], taxonomias: 
             f"{' y otras fuentes' if len(fuentes_unicas) > 5 else ''}."
         )
         cuerpo_orig = (
-            f"Análisis consolidado de MonitorV3.1 para el eje «{tax}» en la Provincia de La Rioja.\n\n"
+            f"Análisis consolidado de MonitorV3.2 para el eje «{tax}» en la Provincia de La Rioja.\n\n"
             + "\n\n".join(extractos)
         )
         vinculados.append({
@@ -448,7 +448,7 @@ def main() -> int:
 
     contenidos_vinculados = construir_contenidos_vinculados(todas_notas, taxonomias)
     salida = {
-        "version": "3.1.0-monitor-v3.1-larioja",
+        "version": "3.2.0-monitor-v3.2-larioja",
         "generado_utc": datetime.now(timezone.utc).isoformat(),
         "jurisdiccion": config.get("jurisdiccion", "Provincia de La Rioja, Argentina"),
         "total_fuentes_activas": len(sitios),

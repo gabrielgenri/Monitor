@@ -3,1125 +3,1151 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MonitorV3.1 · La Rioja (RSS + Crawl + Node 24)</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <title>MonitorV3.2 · RSS & Crawl La Rioja</title>
   <style>
     :root {
-      color-scheme: light dark;
+      --bg: #f6f7f9;
+      --surface: #ffffff;
+      --surface-alt: #f0f2f5;
+      --text: #14171a;
+      --muted: #5c6672;
+      --border: #e2e6ec;
+      --accent: #0f52ba;
+      --accent-soft: #eaf1fc;
+      --ok: #137333;
+      --ok-soft: #e6f4ea;
+      --warn: #b06000;
+      --warn-soft: #fef7e0;
+      --danger: #c5221f;
+      --danger-soft: #fce8e6;
+      --radius: 10px;
     }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
     body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.45;
+      -webkit-font-smoothing: antialiased;
     }
-    .no-scrollbar::-webkit-scrollbar {
-      display: none;
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 10px 14px;
     }
-    .no-scrollbar {
-      -ms-overflow-style: none;
+
+    .topbar-inner {
+      max-width: 1120px;
+      margin: 0 auto;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .brand-badge {
+      background: var(--accent);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 999px;
+      letter-spacing: 0.03em;
+    }
+
+    .brand h1 {
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+
+    .brand-sub {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .toolbar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex: 1 1 280px;
+      justify-content: flex-end;
+    }
+
+    .search-input {
+      width: 100%;
+      max-width: 300px;
+      padding: 7px 11px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 13px;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .search-input:focus {
+      outline: 2px solid var(--accent);
+      border-color: transparent;
+      background: var(--surface);
+    }
+
+    .btn {
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      padding: 7px 11px;
+      border-radius: 8px;
+      font-size: 12.5px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      white-space: nowrap;
+      text-decoration: none;
+    }
+
+    .btn:hover { background: var(--surface-alt); }
+    .btn-primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .btn-primary:hover { opacity: 0.94; background: var(--accent); }
+    .btn-danger { color: var(--danger); border-color: #f3c6c4; background: #fffafa; }
+    .btn-danger:hover { background: var(--danger-soft); }
+
+    .tabs-wrap {
+      max-width: 1120px;
+      margin: 10px auto 0;
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
       scrollbar-width: none;
+      padding-bottom: 2px;
+    }
+    .tabs-wrap::-webkit-scrollbar { display: none; }
+
+    .tab-btn {
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--muted);
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .tab-btn.active {
+      background: var(--accent-soft);
+      color: var(--accent);
+      border-color: #c8dcf9;
+    }
+
+    .container {
+      max-width: 1120px;
+      margin: 14px auto 40px;
+      padding: 0 14px;
+    }
+
+    .stats-strip {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 10px 12px;
+    }
+
+    .stat-num { font-size: 18px; font-weight: 700; }
+    .stat-lbl { font-size: 11.5px; color: var(--muted); }
+
+    .pills-row {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      padding-bottom: 6px;
+      margin-bottom: 12px;
+      scrollbar-width: none;
+    }
+    .pills-row::-webkit-scrollbar { display: none; }
+
+    .pill {
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      padding: 5px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .pill.active {
+      background: var(--text);
+      color: #fff;
+      border-color: var(--text);
+    }
+
+    .feed-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .item-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 13px 14px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      align-items: start;
+    }
+
+    .item-card.with-thumb {
+      grid-template-columns: 1fr 104px;
+    }
+
+    @media (max-width: 640px) {
+      .item-card, .item-card.with-thumb {
+        grid-template-columns: 1fr;
+      }
+      .item-thumb {
+        width: 100%;
+        height: 170px;
+      }
+    }
+
+    .item-meta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px;
+      font-size: 11.5px;
+      color: var(--muted);
+      margin-bottom: 5px;
+    }
+
+    .source-link {
+      color: var(--accent);
+      font-weight: 700;
+      text-decoration: none;
+      cursor: pointer;
+      background: none;
+      border: none;
+      font-size: 12px;
+      padding: 0;
+      text-align: left;
+    }
+    .source-link:hover { text-decoration: underline; }
+
+    .tag-chip {
+      background: var(--surface-alt);
+      color: var(--text);
+      padding: 2px 7px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .item-title {
+      font-size: 15.5px;
+      font-weight: 700;
+      margin-bottom: 4px;
+      color: var(--text);
+    }
+
+    .item-copete {
+      font-size: 13.5px;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .item-cuerpo-preview {
+      font-size: 13px;
+      color: var(--text);
+      background: var(--surface-alt);
+      border-radius: 8px;
+      padding: 8px 10px;
+      margin-bottom: 8px;
+      max-height: 110px;
+      overflow-y: auto;
+      white-space: pre-line;
+    }
+
+    .item-thumb {
+      width: 104px;
+      height: 78px;
+      object-fit: cover;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--surface-alt);
+    }
+
+    .item-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .files-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-bottom: 8px;
+    }
+
+    .file-badge {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 5px;
+      background: var(--warn-soft);
+      color: var(--warn);
+      text-decoration: none;
+      border: 1px solid #f4dc9a;
+    }
+
+    .channels-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+      gap: 10px;
+    }
+
+    .channel-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .status-pill {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 999px;
+    }
+    .status-on { background: var(--ok-soft); color: var(--ok); }
+    .status-off { background: var(--surface-alt); color: var(--muted); }
+
+    .crud-form {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px;
+      margin-bottom: 14px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 10px;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .field label {
+      font-size: 11.5px;
+      font-weight: 600;
+      color: var(--muted);
+    }
+    .field input, .field select {
+      padding: 7px 9px;
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      font-size: 13px;
+      background: var(--surface);
+      color: var(--text);
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.55);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 14px;
+      z-index: 60;
+    }
+    .modal-backdrop.open { display: flex; }
+
+    .modal-box {
+      background: var(--surface);
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      max-width: 760px;
+      width: 100%;
+      max-height: 88vh;
+      overflow-y: auto;
+      padding: 16px;
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.22);
+    }
+
+    .modal-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 10px;
+      margin-bottom: 12px;
+    }
+
+    .modal-body-text {
+      font-size: 14px;
+      line-height: 1.55;
+      white-space: pre-line;
+      margin-top: 8px;
+    }
+
+    .modal-img {
+      width: 100%;
+      max-height: 280px;
+      object-fit: cover;
+      border-radius: 8px;
+      margin: 8px 0;
+      border: 1px solid var(--border);
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 16px;
+      right: 16px;
+      background: var(--text);
+      color: #fff;
+      padding: 9px 14px;
+      border-radius: 8px;
+      font-size: 12.5px;
+      font-weight: 600;
+      opacity: 0;
+      transform: translateY(8px);
+      transition: all 0.2s ease;
+      z-index: 80;
+      pointer-events: none;
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
+
+    .empty-box {
+      background: var(--surface);
+      border: 1px dashed var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 13.5px;
     }
   </style>
 </head>
-<body class="bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 min-h-screen antialiased selection:bg-sky-500/20">
-  <!-- Encabezado compacto minimalista estilo RSS -->
-  <header class="sticky top-0 z-30 bg-white/90 dark:bg-slate-900/90 backdrop-blur border-b border-slate-200 dark:border-slate-800">
-    <div class="max-w-6xl mx-auto px-3 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-2">
-      <div class="flex items-center gap-2.5 min-w-0">
-        <span class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-sky-600 text-white font-bold text-xs tracking-tight shadow-sm">
-          M3.1
-        </span>
-        <div class="min-w-0">
-          <div class="flex items-center gap-2">
-            <h1 class="text-sm sm:text-base font-semibold tracking-tight truncate">MonitorV3.1 · La Rioja</h1>
-            <span class="text-[10px] font-medium px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30">
-              Node 24 Ready
-            </span>
-          </div>
-          <p id="status-bar" class="text-[11px] text-slate-500 dark:text-slate-400 truncate">
-            Cargando catálogo y noticias...
-          </p>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <span class="brand-badge">MonitorV3.2</span>
+        <div>
+          <h1>La Rioja · RSS &amp; Crawl</h1>
+          <div class="brand-sub" id="metaJurisdiccion">Cargando catálogo y noticias...</div>
         </div>
       </div>
-
-      <div class="flex items-center gap-1.5 sm:gap-2">
-        <button id="btn-simular-corrida" type="button"
-          class="px-2.5 py-1.5 text-xs font-medium rounded-lg bg-sky-600 hover:bg-sky-500 text-white transition active:scale-95">
-          Actualizar ahora
-        </button>
-        <button id="btn-export-fuentes" type="button"
-          class="px-2.5 py-1.5 text-xs font-medium rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 transition active:scale-95">
-          Exportar JSON
-        </button>
+      <div class="toolbar">
+        <input id="buscador" class="search-input" type="search" placeholder="Buscar título, copete, cuerpo o fuente..." />
+        <button class="btn btn-primary" id="btnActualizarDemo">Actualizar ahora</button>
       </div>
     </div>
 
-    <!-- Pestañas desplazables horizontalmente -->
-    <nav class="max-w-6xl mx-auto px-3 sm:px-6 flex items-center gap-1 overflow-x-auto no-scrollbar border-t border-slate-100 dark:border-slate-800/70" aria-label="Secciones">
-      <button data-tab="notas" class="tab-btn px-3 py-2.5 text-xs sm:text-sm font-medium border-b-2 border-sky-600 text-sky-600 dark:text-sky-400 whitespace-nowrap transition">
-        Notas consolidadas
-      </button>
-      <button data-tab="sintesis" class="tab-btn px-3 py-2.5 text-xs sm:text-sm font-medium border-b-2 border-transparent text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 whitespace-nowrap transition">
-        Síntesis cross-canal
-      </button>
-      <button data-tab="taxonomias" class="tab-btn px-3 py-2.5 text-xs sm:text-sm font-medium border-b-2 border-transparent text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 whitespace-nowrap transition">
-        Taxonomías y etiquetas
-      </button>
-      <button data-tab="fuentes" class="tab-btn px-3 py-2.5 text-xs sm:text-sm font-medium border-b-2 border-transparent text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 whitespace-nowrap transition">
-        Canales y Fuentes (53)
-      </button>
-    </nav>
+    <div class="tabs-wrap" id="tabsBar">
+      <button class="tab-btn active" data-tab="notas">Notas consolidadas</button>
+      <button class="tab-btn" data-tab="canales">Canales RSS y fuentes</button>
+      <button class="tab-btn" data-tab="vinculados">Contenido vinculado (Original)</button>
+      <button class="tab-btn" data-tab="taxonomias">Taxonomías y etiquetas</button>
+      <button class="tab-btn" data-tab="crud">CRUD de fuentes</button>
+    </div>
   </header>
 
-  <!-- Notificación toast minimalista -->
-  <div id="toast" class="fixed bottom-4 right-4 z-50 hidden max-w-sm rounded-xl bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 px-4 py-2.5 text-xs font-medium shadow-lg border border-slate-700/40">
-  </div>
-
-  <!-- Contenedor principal -->
-  <main class="max-w-6xl mx-auto px-3 sm:px-6 py-4 sm:py-6 space-y-4">
-    <!-- Métricas compactas -->
-    <section id="metrics-grid" class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-      <div class="rounded-xl bg-white dark:bg-slate-900 p-3 border border-slate-200/80 dark:border-slate-800">
-        <div class="text-[11px] text-slate-500 dark:text-slate-400">Notas consolidadas</div>
-        <div id="metric-notas" class="text-lg sm:text-xl font-semibold mt-0.5">0</div>
-      </div>
-      <div class="rounded-xl bg-white dark:bg-slate-900 p-3 border border-slate-200/80 dark:border-slate-800">
-        <div class="text-[11px] text-slate-500 dark:text-slate-400">Fuentes activas</div>
-        <div id="metric-fuentes" class="text-lg sm:text-xl font-semibold mt-0.5">0</div>
-      </div>
-      <div class="rounded-xl bg-white dark:bg-slate-900 p-3 border border-slate-200/80 dark:border-slate-800">
-        <div class="text-[11px] text-slate-500 dark:text-slate-400">Síntesis cross-canal</div>
-        <div id="metric-sintesis" class="text-lg sm:text-xl font-semibold mt-0.5">0</div>
-      </div>
-      <div class="rounded-xl bg-white dark:bg-slate-900 p-3 border border-slate-200/80 dark:border-slate-800">
-        <div class="text-[11px] text-slate-500 dark:text-slate-400">Archivos / Datasets</div>
-        <div id="metric-adjuntos" class="text-lg sm:text-xl font-semibold mt-0.5">0</div>
-      </div>
-    </section>
-
-    <!-- Barra de filtros para Notas consolidadas -->
-    <section id="filters-panel" class="rounded-xl bg-white dark:bg-slate-900 p-3 border border-slate-200/80 dark:border-slate-800 flex flex-col sm:flex-row gap-2.5">
-      <input id="search-input" type="search" placeholder="Buscar por título, cuerpo, fuente o etiqueta..."
-        class="w-full sm:flex-1 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 px-3 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-sky-500" />
-      <select id="filter-taxonomia"
-        class="w-full sm:w-56 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 px-3 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-sky-500">
-        <option value="">Todas las taxonomías</option>
-      </select>
-      <select id="filter-categoria"
-        class="w-full sm:w-56 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 px-3 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-sky-500">
-        <option value="">Todas las categorías (53)</option>
-      </select>
-      <button id="btn-limpiar-filtros" type="button"
-        class="px-3 py-2 text-xs font-medium rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition whitespace-nowrap">
-        Limpiar
-      </button>
-    </section>
-
-    <!-- TAB 1: Notas consolidadas -->
-    <section id="tab-notas" class="space-y-3"></section>
-
-    <!-- TAB 2: Síntesis cross-canal -->
-    <section id="tab-sintesis" class="hidden space-y-3"></section>
-
-    <!-- TAB 3: Taxonomías y etiquetas del día -->
-    <section id="tab-taxonomias" class="hidden space-y-4"></section>
-
-    <!-- TAB 4: Fuentes y CRUD URLs -->
-    <section id="tab-fuentes" class="hidden space-y-4"></section>
+  <main class="container">
+    <section class="stats-strip" id="statsStrip"></section>
+    <div id="tabContent"></div>
   </main>
 
-  <!-- Ventana modal de noticias del momento por fuente/canal -->
-  <div id="channel-modal" class="fixed inset-0 z-50 hidden bg-slate-950/70 backdrop-blur-xs p-3 sm:p-6 overflow-y-auto">
-    <div class="max-w-3xl mx-auto rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden">
-      <div class="px-4 py-3.5 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between gap-2">
-        <div class="min-w-0">
-          <h2 id="modal-title" class="text-sm sm:text-base font-semibold truncate">Noticias de la fuente</h2>
-          <p id="modal-subtitle" class="text-xs text-slate-500 dark:text-slate-400 truncate"></p>
-        </div>
-        <div class="flex items-center gap-2 shrink-0">
-          <a id="modal-web-link" href="#" target="_blank" rel="noopener noreferrer"
-            class="px-2.5 py-1.5 text-xs font-medium rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition">
-            Sitio web
-          </a>
-          <a id="modal-rss-link" href="#" target="_blank" rel="noopener noreferrer"
-            class="hidden px-2.5 py-1.5 text-xs font-medium rounded-lg bg-amber-500/15 text-amber-800 dark:text-amber-300 hover:bg-amber-500/25 transition">
-            Feed RSS
-          </a>
-          <button id="modal-close" type="button"
-            class="px-2.5 py-1.5 text-xs font-medium rounded-lg bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 hover:opacity-90 transition">
-            Cerrar
-          </button>
-        </div>
-      </div>
-      <div id="modal-body" class="p-4 space-y-3 max-h-[75vh] overflow-y-auto"></div>
-    </div>
+  <div class="modal-backdrop" id="modalBackdrop" role="dialog" aria-modal="true">
+    <div class="modal-box" id="modalBox"></div>
   </div>
 
+  <div class="toast" id="toast"></div>
+
   <script>
-    const FALLBACK_FUENTES = {
-      version: "3.1.0-monitor-v3-larioja",
-      runtime_objetivo: "node-24-github-actions",
-      jurisdiccion: "Provincia de La Rioja, Argentina",
-      taxonomias: [
-        "Política y Gestión",
-        "Economía, Finanzas y Producción",
-        "Ciencia, Tecnología y Educación",
-        "Sociedad, Salud y Justicia",
-        "Normativa y Datos Oficiales",
-        "Cultura y Deportes"
-      ],
-      sitios: [
-        { id: "lr-medios-01", nombre: "El Independiente Digital", categoria: "Medios de Comunicación", subtipo: "Diario Provincial", localidad: "La Rioja Capital", url_web: "https://www.elindependiente.com.ar/", url_rss: "https://www.elindependiente.com.ar/feed/", usar_rss: true, crawl_profundidad: 3, tema_por_defecto: "", activo: true },
-        { id: "lr-medios-02", nombre: "Nueva Rioja", categoria: "Medios de Comunicación", subtipo: "Diario Provincial", localidad: "La Rioja Capital", url_web: "https://www.nuevarioja.com.ar/", url_rss: "https://www.nuevarioja.com.ar/rss/feed.xml", usar_rss: true, crawl_profundidad: 3, tema_por_defecto: "", activo: true },
-        { id: "lr-medios-03", nombre: "Medios Provincia (Radio y TV)", categoria: "Medios de Comunicación", subtipo: "Multimedio Provincial", localidad: "La Rioja Capital", url_web: "https://mediosprovincia.com.ar/", url_rss: "https://mediosprovincia.com.ar/feed/", usar_rss: true, crawl_profundidad: 3, tema_por_defecto: "", activo: true },
-        { id: "lr-medios-04", nombre: "Radio Fénix 95.1", categoria: "Medios de Comunicación", subtipo: "Radio y Portal", localidad: "La Rioja Capital", url_web: "https://www.fenix951.com.ar/", url_rss: "", usar_rss: false, crawl_profundidad: 3, tema_por_defecto: "", activo: true },
-        { id: "lr-medios-05", nombre: "Rioja Virtual", categoria: "Medios de Comunicación", subtipo: "Portal Digital", localidad: "La Rioja Capital", url_web: "https://riojavirtual.com.ar/", url_rss: "https://riojavirtual.com.ar/feed/", usar_rss: true, crawl_profundidad: 3, tema_por_defecto: "", activo: true },
-        { id: "lr-medios-06", nombre: "Multiplataforma Fénix / La Red La Rioja", categoria: "Medios de Comunicación", subtipo: "Radio y Portal", localidad: "La Rioja Capital", url_web: "https://laredlarioja.com.ar/", url_rss: "https://laredlarioja.com.ar/feed/", usar_rss: true, crawl_profundidad: 3, tema_por_defecto: "", activo: true },
-        { id: "lr-medios-07", nombre: "Radio Viva 96.3", categoria: "Medios de Comunicación", subtipo: "Radio y Portal", localidad: "La Rioja Capital", url_web: "https://radioviva.com.ar/", url_rss: "https://radioviva.com.ar/feed/", usar_rss: true, crawl_profundidad: 3, tema_por_defecto: "", activo: true },
-        { id: "lr-medios-08", nombre: "Minuto Rioja", categoria: "Medios de Comunicación", subtipo: "Portal Digital", localidad: "La Rioja Capital", url_web: "https://minutorioja.com.ar/", url_rss: "https://minutorioja.com.ar/feed/", usar_rss: true, crawl_profundidad: 3, tema_por_defecto: "", activo: true },
-        { id: "lr-medios-09", nombre: "Tiempo Popular", categoria: "Medios de Comunicación", subtipo: "Portal Digital", localidad: "La Rioja Capital", url_web: "https://www.tiempopopular.com.ar/", url_rss: "https://www.tiempopopular.com.ar/feed/", usar_rss: true, crawl_profundidad: 3, tema_por_defecto: "", activo: true },
-        { id: "lr-medios-10", nombre: "Canal 9 La Rioja (Medios Públicos)", categoria: "Medios de Comunicación", subtipo: "TV Pública Provincial", localidad: "La Rioja Capital", url_web: "https://canal9larioja.com.ar/", url_rss: "https://canal9larioja.com.ar/feed/", usar_rss: true, crawl_profundidad: 3, tema_por_defecto: "", activo: true },
-        { id: "lr-medios-11", nombre: "El Diario de La Rioja", categoria: "Medios de Comunicación", subtipo: "Portal Digital", localidad: "La Rioja Capital", url_web: "https://www.eldiariodelarioja.com.ar/", url_rss: "https://www.eldiariodelarioja.com.ar/feed/", usar_rss: true, crawl_profundidad: 3, tema_por_defecto: "", activo: true },
-        { id: "lr-medios-12", nombre: "El Federal Online (Chilecito)", categoria: "Medios de Comunicación", subtipo: "Portal Regional", localidad: "Chilecito", url_web: "https://elfederalonline.com/", url_rss: "https://elfederalonline.com/feed/", usar_rss: true, crawl_profundidad: 3, tema_por_defecto: "", activo: true },
-        { id: "lr-medios-13", nombre: "Chilecito News / Diario Chilecito", categoria: "Medios de Comunicación", subtipo: "Portal Regional", localidad: "Chilecito", url_web: "https://www.diariochilecito.com.ar/", url_rss: "https://www.diariochilecito.com.ar/feed/", usar_rss: true, crawl_profundidad: 3, tema_por_defecto: "", activo: true },
-        { id: "lr-medios-14", nombre: "El Cronista Chepes", categoria: "Medios de Comunicación", subtipo: "Portal Regional", localidad: "Chepes", url_web: "https://elcronistachepes.com.ar/", url_rss: "https://elcronistachepes.com.ar/feed/", usar_rss: true, crawl_profundidad: 3, tema_por_defecto: "", activo: true },
-        { id: "lr-medios-15", nombre: "Digital Chamical", categoria: "Medios de Comunicación", subtipo: "Portal Regional", localidad: "Chamical", url_web: "https://digitalchamical.com.ar/", url_rss: "https://digitalchamical.com.ar/feed/", usar_rss: true, crawl_profundidad: 3, tema_por_defecto: "", activo: true },
-        { id: "lr-medios-16", nombre: "Aimogasta Noticias", categoria: "Medios de Comunicación", subtipo: "Portal Regional", localidad: "Aimogasta (Arauco)", url_web: "https://aimogastanoticias.com.ar/", url_rss: "https://aimogastanoticias.com.ar/feed/", usar_rss: true, crawl_profundidad: 3, tema_por_defecto: "", activo: true },
-        { id: "lr-medios-17", nombre: "Rioja Libre", categoria: "Medios de Comunicación", subtipo: "Portal Político", localidad: "La Rioja Capital", url_web: "https://riojalibre.com.ar/", url_rss: "https://riojalibre.com.ar/feed/", usar_rss: true, crawl_profundidad: 3, tema_por_defecto: "", activo: true },
-        { id: "lr-medios-18", nombre: "Data Rioja", categoria: "Medios de Comunicación", subtipo: "Periodismo y Datos", localidad: "La Rioja Capital", url_web: "https://datarioja.com/", url_rss: "https://datarioja.com/feed/", usar_rss: true, crawl_profundidad: 3, tema_por_defecto: "", activo: true },
-        { id: "lr-medios-19", nombre: "Radio Nacional La Rioja (LRA 28)", categoria: "Medios de Comunicación", subtipo: "Radio Pública", localidad: "La Rioja Capital", url_web: "https://www.radionacional.com.ar/category/lra-28-la-rioja/", url_rss: "https://www.radionacional.com.ar/category/lra-28-la-rioja/feed/", usar_rss: true, crawl_profundidad: 3, tema_por_defecto: "", activo: true },
-        { id: "lr-medios-20", nombre: "Economía Riojana", categoria: "Medios de Comunicación", subtipo: "Portal Económico", localidad: "La Rioja Capital", url_web: "https://economiariojana.com.ar/", url_rss: "https://economiariojana.com.ar/feed/", usar_rss: true, crawl_profundidad: 3, tema_por_defecto: "", activo: true },
-        { id: "lr-gob-01", nombre: "Portal Oficial Gobierno de La Rioja", categoria: "Entidades de Gobierno", subtipo: "Poder Ejecutivo Provincial", localidad: "La Rioja Capital", url_web: "https://larioja.gob.ar/", url_rss: "", usar_rss: false, crawl_profundidad: 3, tema_por_defecto: "", activo: true },
-        { id: "lr-gob-02", nombre: "Boletín Oficial de la Provincia de La Rioja", categoria: "Entidades de Gobierno", subtipo: "Publicación Oficial y Normativa", localidad: "La Rioja Capital", url_web: "https://boletinoficial.larioja.gob.ar/", url_rss: "", usar_rss: false, crawl_profundidad: 3, tema_por_defecto: "", activo: true },
-        { id: "lr-gob-03", nombre: "Función Legislativa de La Rioja (Cámara de Diputados)", categoria: "Entidades de Gobierno", subtipo: "Poder Legislativo", localidad: "La Rioja Capital", url_web: "https://legislaturalarioja.gob.ar/", url_rss: "", usar_rss: false, crawl_profundidad: 3, tema_por_defecto: "", activo: true },
-        { id: "lr-gob-04", nombre: "Función Judicial de La Rioja (Tribunal Superior de Justicia)", categoria: "Entidades de Gobierno", subtipo: "Poder Judicial", localidad: "La Rioja Capital", url_web: "https://justicialarioja.gob.ar/", url_rss: "", usar_rss: false, crawl_profundidad: 3, tema_por_defecto: "", activo: true },
-        { id: "lr-gob-05", nombre: "Ministerio Público Fiscal de La Rioja", categoria: "Entidades de Gobierno", subtipo: "Órgano Judicial", localidad: "La Rioja Capital", url_web: "https://mpflarioja.gob.ar/", url_rss: "", usar_rss: false, crawl_profundidad: 3, tema_por_defecto: "", activo: true },
-        { id: "lr-gob-06", nombre: "Municipalidad de La Rioja (Capital)", categoria: "Entidades de Gobierno", subtipo: "Gobierno Municipal", localidad: "La Rioja Capital", url_web: "https://municipiolarioja.gob.ar/", url_rss: "", usar_rss: false, crawl_profundidad: 3, tema_por_defecto: "", activo: true },
-        { id: "lr-gob-07", nombre: "Municipalidad de Chilecito", categoria: "Entidades de Gobierno", subtipo: "Gobierno Municipal", localidad: "Chilecito", url_web: "https://chilecito.gob.ar/", url_rss: "", usar_rss: false, crawl_profundidad: 3, tema_por_defecto: "", activo: true },
-        { id: "lr-gob-08", nombre: "Dirección General de Estadística y Sistemas de Información (DGESySI)", categoria: "Instituciones Gubernamentales", subtipo: "Estadísticas y Datos Abiertos", localidad: "La Rioja Capital", url_web: "https://estadistica.larioja.gob.ar/", url_rss: "", usar_rss: false, crawl_profundidad: 3, tema_por_defecto: "", activo: true },
-        { id: "lr-gob-09", nombre: "IDE La Rioja (Infraestructura de Datos Espaciales)", categoria: "Instituciones Gubernamentales", subtipo: "Cartografía y Geodatos (SHP/GIS)", localidad: "La Rioja Capital", url_web: "https://ide.larioja.gob.ar/", url_rss: "", usar_rss: false, crawl_profundidad: 3, tema_por_defecto: "", activo: true },
-        { id: "lr-gob-10", nombre: "Dirección General de Ingresos Provinciales (DGIP)", categoria: "Instituciones Gubernamentales", subtipo: "Recaudación y Normativa Tributaria", localidad: "La Rioja Capital", url_web: "https://dgip.larioja.gob.ar/", url_rss: "", usar_rss: false, crawl_profundidad: 3, tema_por_defecto: "", activo: true },
-        { id: "lr-gob-11", nombre: "Ministerio de Hacienda y Finanzas Públicas", categoria: "Instituciones Gubernamentales", subtipo: "Cartera Económica", localidad: "La Rioja Capital", url_web: "https://hacienda.larioja.gob.ar/", url_rss: "", usar_rss: false, crawl_profundidad: 3, tema_por_defecto: "", activo: true },
-        { id: "lr-gob-12", nombre: "Ministerio de Salud de La Rioja", categoria: "Instituciones Gubernamentales", subtipo: "Cartera Sanitaria", localidad: "La Rioja Capital", url_web: "https://salud.larioja.gob.ar/", url_rss: "", usar_rss: false, crawl_profundidad: 3, tema_por_defecto: "", activo: true },
-        { id: "lr-gob-13", nombre: "Ministerio de Educación de La Rioja", categoria: "Instituciones Gubernamentales", subtipo: "Cartera Educativa", localidad: "La Rioja Capital", url_web: "https://educacion.larioja.gob.ar/", url_rss: "", usar_rss: false, crawl_profundidad: 3, tema_por_defecto: "", activo: true },
-        { id: "lr-gob-14", nombre: "Ministerio de Producción y Ambiente", categoria: "Instituciones Gubernamentales", subtipo: "Cartera Productiva", localidad: "La Rioja Capital", url_web: "https://produccion.larioja.gob.ar/", url_rss: "", usar_rss: false, crawl_profundidad: 3, tema_por_defecto: "", activo: true },
-        { id: "lr-gob-15", nombre: "Ministerio de Turismo y Culturas", categoria: "Instituciones Gubernamentales", subtipo: "Cartera Cultural y Turística", localidad: "La Rioja Capital", url_web: "https://turismo.larioja.gob.ar/", url_rss: "", usar_rss: false, crawl_profundidad: 3, tema_por_defecto: "", activo: true },
-        { id: "lr-gob-16", nombre: "Tribunal de Cuentas de la Provincia de La Rioja", categoria: "Instituciones Gubernamentales", subtipo: "Órgano de Control", localidad: "La Rioja Capital", url_web: "https://tribunaldecuentas.larioja.gob.ar/", url_rss: "", usar_rss: false, crawl_profundidad: 3, tema_por_defecto: "", activo: true },
-        { id: "lr-gob-17", nombre: "APOS (Obra Social Provincial)", categoria: "Instituciones Gubernamentales", subtipo: "Seguridad Social", localidad: "La Rioja Capital", url_web: "https://aposlr.gob.ar/", url_rss: "", usar_rss: false, crawl_profundidad: 3, tema_por_defecto: "", activo: true },
-        { id: "lr-gob-18", nombre: "EUCOP (Ente Único de Control de Privatizaciones)", categoria: "Instituciones Gubernamentales", subtipo: "Ente Regulador Servicios Públicos", localidad: "La Rioja Capital", url_web: "https://eucop.larioja.gob.ar/", url_rss: "", usar_rss: false, crawl_profundidad: 3, tema_por_defecto: "", activo: true },
-        { id: "lr-gob-19", nombre: "Banco Rioja (SAU)", categoria: "Instituciones Gubernamentales", subtipo: "Banca Pública Provincial", localidad: "La Rioja Capital", url_web: "https://bancorioja.com.ar/", url_rss: "", usar_rss: false, crawl_profundidad: 3, tema_por_defecto: "", activo: true },
-        { id: "lr-gob-20", nombre: "Parque Eólico Arauco SAPEM", categoria: "Instituciones Gubernamentales", subtipo: "Empresa Estatal Energética", localidad: "Arauco / La Rioja", url_web: "https://parqueeolicoarauco.com.ar/", url_rss: "", usar_rss: false, crawl_profundidad: 3, tema_por_defecto: "", activo: true },
-        { id: "lr-uni-01", nombre: "Universidad Nacional de La Rioja (UNLaR)", categoria: "Universidades", subtipo: "Universidad Nacional", localidad: "La Rioja Capital y Sedes", url_web: "https://www.unlar.edu.ar/", url_rss: "https://www.unlar.edu.ar/index.php?format=feed&type=rss", usar_rss: true, crawl_profundidad: 3, tema_por_defecto: "", activo: true },
-        { id: "lr-uni-02", nombre: "Repositorio Institucional Digital UNLaR (RIDUNLaR)", categoria: "Universidades", subtipo: "Repositorio Científico y Tesis", localidad: "La Rioja Capital", url_web: "https://repositorio.unlar.edu.ar/", url_rss: "", usar_rss: false, crawl_profundidad: 3, tema_por_defecto: "", activo: true },
-        { id: "lr-uni-03", nombre: "Universidad Nacional de Chilecito (UNdeC)", categoria: "Universidades", subtipo: "Universidad Nacional", localidad: "Chilecito", url_web: "https://www.undec.edu.ar/", url_rss: "https://www.undec.edu.ar/feed/", usar_rss: true, crawl_profundidad: 3, tema_por_defecto: "", activo: true },
-        { id: "lr-uni-04", nombre: "UTN - Facultad Regional La Rioja", categoria: "Universidades", subtipo: "Universidad Tecnológica Nacional", localidad: "La Rioja Capital", url_web: "https://www.frlr.utn.edu.ar/", url_rss: "", usar_rss: false, crawl_profundidad: 3, tema_por_defecto: "", activo: true },
-        { id: "lr-uni-05", nombre: "Fundación Barceló - Sede La Rioja", categoria: "Universidades", subtipo: "Instituto Universitario Ciencias de la Salud", localidad: "La Rioja Capital", url_web: "https://www.barcelo.edu.ar/sede-la-rioja", url_rss: "", usar_rss: false, crawl_profundidad: 3, tema_por_defecto: "", activo: true },
-        { id: "lr-uni-06", nombre: "Universidad Siglo 21 - CAU La Rioja", categoria: "Universidades", subtipo: "Universidad Privada", localidad: "La Rioja Capital", url_web: "https://21.edu.ar/", url_rss: "", usar_rss: false, crawl_profundidad: 1, tema_por_defecto: "", activo: true },
-        { id: "lr-inv-01", nombre: "CRILAR - CONICET (Centro Regional de Investigaciones Científicas y Transferencia Tecnológica de La Rioja)", categoria: "Centros de Investigación", subtipo: "Unidad Ejecutora CONICET", localidad: "Anillaco (Castro Barros)", url_web: "https://crilar.conicet.gov.ar/", url_rss: "https://crilar.conicet.gov.ar/feed/", usar_rss: true, crawl_profundidad: 3, tema_por_defecto: "", activo: true },
-        { id: "lr-inv-02", nombre: "INTA - Estación Experimental Agropecuaria La Rioja (Chamical)", categoria: "Centros de Investigación", subtipo: "Investigación Agropecuaria Nacional", localidad: "Chamical", url_web: "https://www.argentina.gob.ar/inta/cr-catamarca-la-rioja/eea-la-rioja", url_rss: "", usar_rss: false, crawl_profundidad: 3, tema_por_defecto: "", activo: true },
-        { id: "lr-inv-03", nombre: "INTA - Estación Experimental Agropecuaria Chilecito", categoria: "Centros de Investigación", subtipo: "Investigación Agropecuaria y Vitivinícola", localidad: "Chilecito", url_web: "https://www.argentina.gob.ar/inta/cr-catamarca-la-rioja/eea-chilecito", url_rss: "", usar_rss: false, crawl_profundidad: 3, tema_por_defecto: "", activo: true },
-        { id: "lr-inv-04", nombre: "INTI - Sede La Rioja (Instituto Nacional de Tecnología Industrial)", categoria: "Centros de Investigación", subtipo: "Tecnología Industrial", localidad: "La Rioja Capital", url_web: "https://www.argentina.gob.ar/inti/region-noa/la-rioja", url_rss: "", usar_rss: false, crawl_profundidad: 3, tema_por_defecto: "", activo: true },
-        { id: "lr-inv-05", nombre: "Polo Tecnológico La Rioja", categoria: "Centros de Investigación", subtipo: "Innovación y Desarrollo Software", localidad: "La Rioja Capital", url_web: "https://polotecnologico.larioja.gob.ar/", url_rss: "", usar_rss: false, crawl_profundidad: 3, tema_por_defecto: "", activo: true },
-        { id: "lr-inv-06", nombre: "IAMRA - Instituto de Ambiente de Montaña y Regiones Áridas (UNdeC)", categoria: "Centros de Investigación", subtipo: "Instituto Universitario de Investigación", localidad: "Chilecito", url_web: "https://www.undec.edu.ar/investigacion/", url_rss: "", usar_rss: false, crawl_profundidad: 3, tema_por_defecto: "", activo: true },
-        { id: "lr-inv-07", nombre: "Secretaría de Ciencia y Tecnología de La Rioja", categoria: "Centros de Investigación", subtipo: "Organismo Provincial de CyT", localidad: "La Rioja Capital", url_web: "https://cienciaytecnologia.larioja.gob.ar/", url_rss: "", usar_rss: false, crawl_profundidad: 3, tema_por_defecto: "", activo: true }
-      ]
-    };
-
-    const FALLBACK_NOTICIAS = {
-      ultima_actualizacion: "2026-11-24T21:00:00-03:00",
-      jurisdiccion: "La Rioja, Argentina",
-      runtime_actions: "Node 24 + Python 3.12",
-      contenidos_vinculados: [
-        {
-          id: "v3-sintesis-01",
-          taxonomia: "Política y Gestión",
-          fecha_generacion: "2026-11-24T21:00:00-03:00",
-          titulo_original: "Síntesis Cross-Canal · Política y Gestión",
-          copete: "Vinculación temática de fuentes en La Rioja sobre política y gestión.",
-          cuerpo_original: "Síntesis automática de MonitorV3.1 para La Rioja en el eje 'Política y Gestión', integrando registros de Portal Oficial Gobierno de La Rioja y El Independiente Digital.\n\n• [Portal Oficial Gobierno de La Rioja] Plan de obras hídricas y conectividad rural en departamentos de La Rioja: Detalle de acciones sobre abastecimiento de agua y caminos rurales.\n\n• [El Independiente Digital] Debate legislativo y agenda institucional en la provincia: Cobertura de actividad parlamentaria, acuerdos y gestión provincial.",
-          etiquetas_vinculadas: ["gestión", "gobierno", "legislatura", "municipio", "la rioja"],
-          fuentes_cruzadas: [
-            { id_nota: "v3-nota-01", titulo: "Plan de obras hídricas y conectividad rural en departamentos de La Rioja", fuente: "Portal Oficial Gobierno de La Rioja", enlace: "https://larioja.gob.ar/" },
-            { id_nota: "v3-nota-02", titulo: "Debate legislativo y agenda institucional en la provincia", fuente: "El Independiente Digital", enlace: "https://www.elindependiente.com.ar/" }
-          ]
-        },
-        {
-          id: "v3-sintesis-02",
-          taxonomia: "Economía, Finanzas y Producción",
-          fecha_generacion: "2026-11-24T21:00:00-03:00",
-          titulo_original: "Síntesis Cross-Canal · Economía, Finanzas y Producción",
-          copete: "Vinculación temática de fuentes en La Rioja sobre economía, finanzas y producción.",
-          cuerpo_original: "Síntesis automática de MonitorV3.1 para La Rioja en el eje 'Economía, Finanzas y Producción', integrando Economía Riojana y Parque Eólico Arauco SAPEM.\n\n• [Economía Riojana] Balance de exportaciones olivícolas, vitivinícolas y expansión energética.\n\n• [Parque Eólico Arauco SAPEM] Ampliación de capacidad instalada y generación limpia provincial.",
-          etiquetas_vinculadas: ["economía", "producción", "olivo", "vino", "parque eólico", "energía"],
-          fuentes_cruzadas: [
-            { id_nota: "v3-nota-06", titulo: "Balance de exportaciones olivícolas, vitivinícolas y expansión energética", fuente: "Economía Riojana", enlace: "https://economiariojana.com.ar/" },
-            { id_nota: "v3-nota-07", titulo: "Ampliación de capacidad instalada y generación limpia provincial", fuente: "Parque Eólico Arauco SAPEM", enlace: "https://parqueeolicoarauco.com.ar/" }
-          ]
-        },
-        {
-          id: "v3-sintesis-03",
-          taxonomia: "Ciencia, Tecnología y Educación",
-          fecha_generacion: "2026-11-24T21:00:00-03:00",
-          titulo_original: "Síntesis Cross-Canal · Ciencia, Tecnología y Educación",
-          copete: "Vinculación temática de fuentes en La Rioja sobre ciencia, tecnología y educación.",
-          cuerpo_original: "Síntesis automática de MonitorV3.1 para La Rioja en el eje 'Ciencia, Tecnología y Educación', integrando CRILAR - CONICET y la Universidad Nacional de La Rioja (UNLaR).\n\n• [CRILAR - CONICET] Estudios hidrogeológicos y ambientales en zonas áridas riojanas.\n\n• [Universidad Nacional de La Rioja (UNLaR)] Convocatoria a proyectos de investigación y vinculación tecnológica.",
-          etiquetas_vinculadas: ["conicet", "crilar", "investigación", "unlar", "universidad"],
-          fuentes_cruzadas: [
-            { id_nota: "v3-nota-03", titulo: "Estudios hidrogeológicos y ambientales en zonas áridas riojanas", fuente: "CRILAR - CONICET (Centro Regional de Investigaciones Científicas y Transferencia Tecnológica de La Rioja)", enlace: "https://crilar.conicet.gov.ar/" },
-            { id_nota: "v3-nota-04", titulo: "Convocatoria a proyectos de investigación y vinculación tecnológica", fuente: "Universidad Nacional de La Rioja (UNLaR)", enlace: "https://www.unlar.edu.ar/" }
-          ]
-        }
-      ],
-      notas: [
-        {
-          id: "v3-nota-01",
-          titulo: "Plan de obras hídricas y conectividad rural en departamentos de La Rioja",
-          copete: "Detalle de acciones sobre abastecimiento de agua y caminos rurales en el interior provincial.",
-          cuerpo: "El monitoreo institucional registra avances en obras hídricas, perforaciones y mejoras de conectividad destinadas a localidades del interior de La Rioja, acompañadas de documentación técnica descargable para municipios y consorcios.",
-          imagen: "https://placehold.co/800x420/0f172a/38bdf8?text=Gobierno+de+La+Rioja+%C2%B7+Infraestructura",
-          enlace: "https://larioja.gob.ar/",
-          fuente_id: "lr-gob-01",
-          fuente: "Portal Oficial Gobierno de La Rioja",
-          categoria: "Entidades de Gobierno",
-          subtipo: "Poder Ejecutivo Provincial",
-          localidad: "La Rioja Capital",
-          taxonomia: "Política y Gestión",
-          etiquetas: ["gestión", "gobierno", "agua", "la rioja"],
-          adjuntos: [{ nombre_archivo: "plan-hidrico-lr.pdf", extension: "PDF", url: "https://larioja.gob.ar/" }],
-          fecha_publicacion: "2026-11-24T19:20:00-03:00"
-        },
-        {
-          id: "v3-nota-02",
-          titulo: "Debate legislativo y agenda institucional en la provincia",
-          copete: "Cobertura de actividad parlamentaria, acuerdos y temas de gestión provincial.",
-          cuerpo: "El seguimiento de medios provinciales recoge iniciativas legislativas, gestión municipal y debates de interés público en la capital y el interior de La Rioja.",
-          imagen: "https://placehold.co/800x420/0f172a/e2e8f0?text=El+Independiente+Digital+%C2%B7+La+Rioja",
-          enlace: "https://www.elindependiente.com.ar/",
-          fuente_id: "lr-medios-01",
-          fuente: "El Independiente Digital",
-          categoria: "Medios de Comunicación",
-          subtipo: "Diario Provincial",
-          localidad: "La Rioja Capital",
-          taxonomia: "Política y Gestión",
-          etiquetas: ["legislatura", "diputados", "gestión", "la rioja"],
-          adjuntos: [],
-          fecha_publicacion: "2026-11-24T18:40:00-03:00"
-        },
-        {
-          id: "v3-nota-03",
-          titulo: "Estudios hidrogeológicos y ambientales en zonas áridas riojanas",
-          copete: "Publicación de registros científicos y conjuntos de datos sobre ecosistemas áridos.",
-          cuerpo: "Equipos de investigación del CRILAR-CONICET difunden resultados de relevamientos ambientales, geológicos y de recursos hídricos en Anillaco con datasets abiertos en formato CSV.",
-          imagen: "https://placehold.co/800x420/0f172a/34d399?text=CRILAR+-+CONICET+%C2%B7+Anillaco",
-          enlace: "https://crilar.conicet.gov.ar/",
-          fuente_id: "lr-inv-01",
-          fuente: "CRILAR - CONICET (Centro Regional de Investigaciones Científicas y Transferencia Tecnológica de La Rioja)",
-          categoria: "Centros de Investigación",
-          subtipo: "Unidad Ejecutora CONICET",
-          localidad: "Anillaco (Castro Barros)",
-          taxonomia: "Ciencia, Tecnología y Educación",
-          etiquetas: ["conicet", "crilar", "investigación", "ciencia"],
-          adjuntos: [{ nombre_archivo: "monitoreo-aridos.csv", extension: "CSV", url: "https://crilar.conicet.gov.ar/" }],
-          fecha_publicacion: "2026-11-24T17:10:00-03:00"
-        },
-        {
-          id: "v3-nota-04",
-          titulo: "Convocatoria a proyectos de investigación y vinculación tecnológica",
-          copete: "Líneas de trabajo abiertas para equipos universitarios y transferencia al medio.",
-          cuerpo: "La UNLaR promueve proyectos orientados a producción regional, sostenibilidad y tecnología aplicada con bases y formularios disponibles para la comunidad académica.",
-          imagen: "https://placehold.co/800x420/0f172a/60a5fa?text=UNLaR+%C2%B7+Ciencia+y+Tecnolog%C3%ADa",
-          enlace: "https://www.unlar.edu.ar/",
-          fuente_id: "lr-uni-01",
-          fuente: "Universidad Nacional de La Rioja (UNLaR)",
-          categoria: "Universidades",
-          subtipo: "Universidad Nacional",
-          localidad: "La Rioja Capital y Sedes",
-          taxonomia: "Ciencia, Tecnología y Educación",
-          etiquetas: ["unlar", "universidad", "investigación", "tecnología"],
-          adjuntos: [],
-          fecha_publicacion: "2026-11-24T16:30:00-03:00"
-        },
-        {
-          id: "v3-nota-05",
-          titulo: "Publicaciones normativas y registros oficiales provinciales",
-          copete: "Actualización de normas, decretos y documentos oficiales de consulta pública.",
-          cuerpo: "El seguimiento de fuentes normativas reúne resoluciones y publicaciones oficiales de interés jurídico, administrativo y estadístico para La Rioja.",
-          imagen: "https://placehold.co/800x420/0f172a/fbbf24?text=Bolet%C3%ADn+Oficial+La+Rioja",
-          enlace: "https://boletinoficial.larioja.gob.ar/",
-          fuente_id: "lr-gob-02",
-          fuente: "Boletín Oficial de la Provincia de La Rioja",
-          categoria: "Entidades de Gobierno",
-          subtipo: "Publicación Oficial y Normativa",
-          localidad: "La Rioja Capital",
-          taxonomia: "Normativa y Datos Oficiales",
-          etiquetas: ["boletín oficial", "decreto", "resolución", "normativa"],
-          adjuntos: [{ nombre_archivo: "sumario-oficial.xlsx", extension: "XLSX", url: "https://boletinoficial.larioja.gob.ar/" }],
-          fecha_publicacion: "2026-11-24T15:00:00-03:00"
-        },
-        {
-          id: "v3-nota-06",
-          titulo: "Balance de exportaciones olivícolas, vitivinícolas y expansión energética",
-          copete: "Desempeño productivo del valle de Chilecito, Aimogasta y matriz industrial riojana.",
-          cuerpo: "Informes sectoriales destacan el crecimiento de exportaciones de aceite de oliva, vinos de altura y nuevas inversiones agroindustriales en departamentos productivos de La Rioja.",
-          imagen: "https://placehold.co/800x420/0f172a/f59e0b?text=Econom%C3%ADa+Riojana+%C2%B7+Producci%C3%B3n",
-          enlace: "https://economiariojana.com.ar/",
-          fuente_id: "lr-medios-20",
-          fuente: "Economía Riojana",
-          categoria: "Medios de Comunicación",
-          subtipo: "Portal Económico",
-          localidad: "La Rioja Capital",
-          taxonomia: "Economía, Finanzas y Producción",
-          etiquetas: ["economía", "producción", "olivo", "vino", "exportación", "chilecito"],
-          adjuntos: [],
-          fecha_publicacion: "2026-11-24T14:20:00-03:00"
-        },
-        {
-          id: "v3-nota-07",
-          titulo: "Ampliación de capacidad instalada y generación limpia provincial",
-          copete: "Nuevos indicadores operativos de energía eólica y solar en el departamento Arauco.",
-          cuerpo: "Parque Eólico Arauco SAPEM presentó reportes técnicos sobre generación renovable, integración al sistema interconectado y eficiencia energética.",
-          imagen: "https://placehold.co/800x420/0f172a/22d3ee?text=Parque+E%C3%B3lico+Arauco+SAPEM",
-          enlace: "https://parqueeolicoarauco.com.ar/",
-          fuente_id: "lr-gob-20",
-          fuente: "Parque Eólico Arauco SAPEM",
-          categoria: "Instituciones Gubernamentales",
-          subtipo: "Empresa Estatal Energética",
-          localidad: "Arauco / La Rioja",
-          taxonomia: "Economía, Finanzas y Producción",
-          etiquetas: ["parque eólico", "energía", "arauco", "producción"],
-          adjuntos: [{ nombre_archivo: "generacion-arauco.json", extension: "JSON", url: "https://parqueeolicoarauco.com.ar/" }],
-          fecha_publicacion: "2026-11-24T13:15:00-03:00"
-        },
-        {
-          id: "v3-nota-08",
-          titulo: "Actualización de campañas sanitarias y atención hospitalaria en La Rioja",
-          copete: "Cronograma de vacunación preventiva y refuerzo de guardias en centros de salud.",
-          cuerpo: "El Ministerio de Salud de La Rioja informó acciones territoriales de prevención del dengue, vacunación y atención primaria en hospitales zonales y CAPS.",
-          imagen: "https://placehold.co/800x420/0f172a/fb7185?text=Ministerio+de+Salud+La+Rioja",
-          enlace: "https://salud.larioja.gob.ar/",
-          fuente_id: "lr-gob-12",
-          fuente: "Ministerio de Salud de La Rioja",
-          categoria: "Instituciones Gubernamentales",
-          subtipo: "Cartera Sanitaria",
-          localidad: "La Rioja Capital",
-          taxonomia: "Sociedad, Salud y Justicia",
-          etiquetas: ["salud", "hospital", "dengue", "vacunación"],
-          adjuntos: [],
-          fecha_publicacion: "2026-11-24T12:05:00-03:00"
-        }
-      ]
-    };
-
     const state = {
-      activeTab: "notas",
-      fuentesData: structuredClone(FALLBACK_FUENTES),
-      noticiasData: structuredClone(FALLBACK_NOTICIAS),
-      search: "",
-      taxonomia: "",
-      categoria: "",
-      etiqueta: "",
-      fuentesCategoria: "",
-      fuentesSearch: "",
-      editingId: null
+      tab: "notas",
+      busqueda: "",
+      taxonomiaFiltro: "Todas",
+      categoriaFuenteFiltro: "Todas",
+      etiquetaFiltro: "",
+      fuentesConfig: null,
+      noticiasData: null,
+      editandoId: null
     };
 
     function showToast(msg) {
       const el = document.getElementById("toast");
       el.textContent = msg;
-      el.classList.remove("hidden");
-      clearTimeout(window.__toastTimer);
-      window.__toastTimer = setTimeout(() => el.classList.add("hidden"), 2600);
+      el.classList.add("show");
+      clearTimeout(window._toastTimer);
+      window._toastTimer = setTimeout(() => el.classList.remove("show"), 2200);
     }
 
-    function copyText(text, label = "Copiado al portapapeles") {
-      try {
-        if (navigator.clipboard && window.isSecureContext) {
-          navigator.clipboard.writeText(text).catch(() => fallbackCopy(text));
-        } else {
-          fallbackCopy(text);
-        }
-        showToast(label);
-      } catch (err) {
-        fallbackCopy(text);
-        showToast(label);
+    function copiarTexto(texto, msg = "Contenido copiado") {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(texto).then(() => showToast(msg)).catch(() => fallbackCopy(texto, msg));
+      } else {
+        fallbackCopy(texto, msg);
       }
     }
 
-    function fallbackCopy(text) {
+    function fallbackCopy(texto, msg) {
       const ta = document.createElement("textarea");
-      ta.value = text;
-      ta.style.position = "fixed";
-      ta.style.opacity = "0";
+      ta.value = texto;
       document.body.appendChild(ta);
       ta.select();
       document.execCommand("copy");
       document.body.removeChild(ta);
-    }
-
-    async function loadInitialData() {
-      try {
-        const [fRes, nRes] = await Promise.all([
-          fetch("./data/monitor_v3_fuentes.json"),
-          fetch("./data/monitor_v3_noticias.json")
-        ]);
-        if (fRes.ok) {
-          state.fuentesData = await fRes.json();
-        }
-        if (nRes.ok) {
-          state.noticiasData = await nRes.json();
-        }
-      } catch (e) {
-        // Respaldo embebido activo cuando se abre sin servidor HTTP
-      }
-      populateTaxonomiaSelect();
-      populateCategoriaSelect();
-      renderAll();
-    }
-
-    function populateTaxonomiaSelect() {
-      const select = document.getElementById("filter-taxonomia");
-      const current = select.value;
-      select.innerHTML = '<option value="">Todas las taxonomías</option>';
-      (state.fuentesData.taxonomias || []).forEach(tax => {
-        const opt = document.createElement("option");
-        opt.value = tax;
-        opt.textContent = tax;
-        select.appendChild(opt);
-      });
-      select.value = current;
-    }
-
-    function populateCategoriaSelect() {
-      const select = document.getElementById("filter-categoria");
-      const current = select.value;
-      const sitios = state.fuentesData.sitios || [];
-      const counts = {};
-      sitios.forEach(s => {
-        counts[s.categoria] = (counts[s.categoria] || 0) + 1;
-      });
-      select.innerHTML = `<option value="">Todas las categorías (${sitios.length})</option>`;
-      Object.entries(counts).forEach(([cat, cnt]) => {
-        const opt = document.createElement("option");
-        opt.value = cat;
-        opt.textContent = `${cat} (${cnt})`;
-        select.appendChild(opt);
-      });
-      select.value = current;
-    }
-
-    function getFilteredNotas() {
-      const q = state.search.trim().toLowerCase();
-      return (state.noticiasData.notas || []).filter(n => {
-        if (state.taxonomia && n.taxonomia !== state.taxonomia) return false;
-        if (state.categoria && n.categoria !== state.categoria) return false;
-        if (state.etiqueta) {
-          const tags = (n.etiquetas || []).map(t => t.toLowerCase());
-          if (!tags.includes(state.etiqueta.toLowerCase())) return false;
-        }
-        if (q) {
-          const blob = [
-            n.titulo, n.copete, n.cuerpo, n.fuente, n.taxonomia, n.localidad,
-            ...(n.etiquetas || [])
-          ].join(" ").toLowerCase();
-          if (!blob.includes(q)) return false;
-        }
-        return true;
-      });
-    }
-
-    function renderMetrics() {
-      const notas = state.noticiasData.notas || [];
-      const sitios = state.fuentesData.sitios || [];
-      const sintesis = state.noticiasData.contenidos_vinculados || [];
-      const adjuntos = notas.reduce((acc, n) => acc + ((n.adjuntos && n.adjuntos.length) || 0), 0);
-
-      document.getElementById("metric-notas").textContent = notas.length;
-      document.getElementById("metric-fuentes").textContent = sitios.filter(s => s.activo !== false).length;
-      document.getElementById("metric-sintesis").textContent = sintesis.length;
-      document.getElementById("metric-adjuntos").textContent = adjuntos;
-
-      const updated = state.noticiasData.ultima_actualizacion || "Sin fecha";
-      document.getElementById("status-bar").textContent =
-        `La Rioja · Actualizado: ${updated} · Cron 08:00 / 13:00 / 19:00 ART`;
-    }
-
-    function renderNotas() {
-      const container = document.getElementById("tab-notas");
-      const notas = getFilteredNotas();
-
-      if (state.etiqueta) {
-        container.innerHTML = `
-          <div class="flex items-center justify-between rounded-xl bg-sky-500/10 border border-sky-500/30 px-3 py-2 text-xs">
-            <span>Filtrando por etiqueta activa: <strong>#${escapeHtml(state.etiqueta)}</strong></span>
-            <button type="button" onclick="clearEtiqueta()" class="font-semibold text-sky-700 dark:text-sky-300 underline">Quitar etiqueta</button>
-          </div>
-        `;
-      } else {
-        container.innerHTML = "";
-      }
-
-      if (!notas.length) {
-        container.innerHTML += `
-          <div class="rounded-xl bg-white dark:bg-slate-900 p-8 text-center border border-slate-200 dark:border-slate-800 text-sm text-slate-500">
-            No se encontraron notas con los filtros actuales.
-          </div>
-        `;
-        return;
-      }
-
-      const list = document.createElement("div");
-      list.className = "grid grid-cols-1 md:grid-cols-2 gap-3";
-
-      notas.forEach(nota => {
-        const card = document.createElement("article");
-        card.className = "rounded-xl bg-white dark:bg-slate-900 p-4 border border-slate-200/80 dark:border-slate-800 flex flex-col justify-between gap-3 hover:border-sky-500/50 transition";
-
-        const adjuntosHtml = (nota.adjuntos || []).length
-          ? `<div class="flex flex-wrap gap-1.5 mt-2">
-              ${(nota.adjuntos || []).map(a =>
-                `<span class="text-[11px] px-2 py-0.5 rounded bg-amber-500/15 text-amber-800 dark:text-amber-300 border border-amber-500/25">${escapeHtml(a.extension || "FILE")}: ${escapeHtml(a.nombre_archivo || "archivo")}</span>`
-              ).join("")}
-            </div>`
-          : "";
-
-        const tagsHtml = (nota.etiquetas || []).map(tag =>
-          `<button type="button" onclick="selectEtiqueta('${escapeJs(tag)}')" class="text-[11px] px-2 py-0.5 rounded-full bg-slate-100 hover:bg-sky-500/15 dark:bg-slate-800 text-slate-600 dark:text-slate-300 transition">#${escapeHtml(tag)}</button>`
-        ).join("");
-
-        const imageHtml = nota.imagen
-          ? `<div class="mb-2.5 overflow-hidden rounded-lg border border-slate-200/70 dark:border-slate-800 bg-slate-100 dark:bg-slate-950">
-               <img src="${escapeAttr(nota.imagen)}" alt="${escapeAttr(nota.titulo)}" loading="lazy"
-                 onerror="this.parentElement.style.display='none'"
-                 class="w-full h-40 sm:h-44 object-cover" />
-             </div>`
-          : "";
-
-        card.innerHTML = `
-          <div>
-            ${imageHtml}
-            <div class="flex items-center justify-between gap-2 text-[11px] text-slate-500 dark:text-slate-400 mb-1.5">
-              <button type="button" onclick="openFuenteModal('${escapeJs(nota.fuente_id || "")}', '${escapeJs(nota.fuente || "")}')" class="font-semibold text-sky-700 dark:text-sky-400 hover:underline text-left truncate">
-                ${escapeHtml(nota.fuente || "Fuente")}
-              </button>
-              <span class="shrink-0 px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-[10px]">${escapeHtml(nota.taxonomia || "Clasificación automática")}</span>
-            </div>
-            <div class="text-[10px] text-slate-400 mb-1">${escapeHtml(nota.categoria || "")} · ${escapeHtml(nota.localidad || "La Rioja")}</div>
-            <h3 class="text-sm sm:text-base font-semibold leading-snug">${escapeHtml(nota.titulo)}</h3>
-            ${nota.copete ? `<p class="text-xs font-medium text-slate-600 dark:text-slate-300 mt-1">${escapeHtml(nota.copete)}</p>` : ""}
-            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1.5 whitespace-pre-line leading-relaxed">${escapeHtml(nota.cuerpo || "")}</p>
-            ${adjuntosHtml}
-          </div>
-
-          <div class="space-y-2.5 pt-2 border-t border-slate-100 dark:border-slate-800">
-            <div class="flex flex-wrap gap-1">${tagsHtml}</div>
-            <div class="flex items-center justify-between gap-2 text-xs">
-              <a href="${escapeAttr(nota.enlace || "#")}" target="_blank" rel="noopener noreferrer"
-                class="font-medium text-sky-600 dark:text-sky-400 hover:underline">
-                Abrir nota →
-              </a>
-              <div class="flex items-center gap-1.5">
-                <button type="button" onclick='copyNota(${JSON.stringify(nota.id)})'
-                  class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 font-medium transition">
-                  Copiar texto
-                </button>
-                <button type="button" onclick="copyText('${escapeJs(nota.enlace || "")}', 'Enlace copiado')"
-                  class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 font-medium transition">
-                  Enlace
-                </button>
-              </div>
-            </div>
-          </div>
-        `;
-        list.appendChild(card);
-      });
-
-      container.appendChild(list);
-    }
-
-    function renderSintesis() {
-      const container = document.getElementById("tab-sintesis");
-      const items = state.noticiasData.contenidos_vinculados || [];
-
-      if (!items.length) {
-        container.innerHTML = `<div class="rounded-xl bg-white dark:bg-slate-900 p-6 border border-slate-200 dark:border-slate-800 text-sm text-slate-500">Sin contenidos de síntesis generados aún.</div>`;
-        return;
-      }
-
-      container.innerHTML = items.map(item => {
-        const fuentes = (item.fuentes_cruzadas || []).map(f =>
-          `<a href="${escapeAttr(f.enlace || "#")}" target="_blank" rel="noopener noreferrer" class="text-xs px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-sky-500/15 transition">${escapeHtml(f.fuente)}</a>`
-        ).join("");
-
-        const payload = `${item.titulo_original}\n${item.copete}\n\n${item.cuerpo_original}`;
-
-        return `
-          <article class="rounded-xl bg-white dark:bg-slate-900 p-4 border border-slate-200/80 dark:border-slate-800 space-y-3">
-            <div class="flex items-center justify-between gap-2">
-              <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-indigo-500/15 text-indigo-700 dark:text-indigo-300">
-                ${escapeHtml(item.taxonomia)}
-              </span>
-              <button type="button" onclick="copyText('${escapeJs(payload)}', 'Síntesis copiada')"
-                class="px-2.5 py-1 text-xs font-medium rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition">
-                Copiar síntesis
-              </button>
-            </div>
-            <h3 class="text-base font-semibold">${escapeHtml(item.titulo_original)}</h3>
-            <p class="text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-300">${escapeHtml(item.copete || "")}</p>
-            <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 whitespace-pre-line leading-relaxed">${escapeHtml(item.cuerpo_original || "")}</p>
-            <div class="pt-2 border-t border-slate-100 dark:border-slate-800 flex flex-wrap gap-1.5">
-              ${fuentes}
-            </div>
-          </article>
-        `;
-      }).join("");
-    }
-
-    function renderTaxonomias() {
-      const container = document.getElementById("tab-taxonomias");
-      const taxonomias = state.fuentesData.taxonomias || [];
-      const notas = state.noticiasData.notas || [];
-
-      const tagCounts = {};
-      notas.forEach(n => {
-        (n.etiquetas || []).forEach(t => {
-          const k = t.toLowerCase();
-          tagCounts[k] = (tagCounts[k] || 0) + 1;
-        });
-      });
-      const sortedTags = Object.entries(tagCounts).sort((a, b) => b[1] - a[1]);
-
-      const taxHtml = taxonomias.map(tax => {
-        const count = notas.filter(n => n.taxonomia === tax).length;
-        return `
-          <button type="button" onclick="filterByTaxonomia('${escapeJs(tax)}')"
-            class="text-left rounded-xl bg-white dark:bg-slate-900 p-3.5 border border-slate-200/80 dark:border-slate-800 hover:border-sky-500 transition flex items-center justify-between gap-2">
-            <span class="text-xs sm:text-sm font-medium">${escapeHtml(tax)}</span>
-            <span class="text-xs px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 font-semibold">${count}</span>
-          </button>
-        `;
-      }).join("");
-
-      const tagsHtml = sortedTags.length
-        ? sortedTags.map(([tag, cnt]) =>
-            `<button type="button" onclick="selectEtiqueta('${escapeJs(tag)}')" class="text-xs px-3 py-1.5 rounded-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-sky-500 transition">#${escapeHtml(tag)} <span class="text-slate-400">(${cnt})</span></button>`
-          ).join("")
-        : `<p class="text-xs text-slate-500">Sin etiquetas registradas.</p>`;
-
-      container.innerHTML = `
-        <div class="space-y-2">
-          <h2 class="text-sm font-semibold">Taxonomías configuradas</h2>
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">${taxHtml}</div>
-        </div>
-        <div class="space-y-2">
-          <h2 class="text-sm font-semibold">Etiquetas activas del día</h2>
-          <div class="flex flex-wrap gap-2">${tagsHtml}</div>
-        </div>
-      `;
-    }
-
-    function renderFuentesCrud() {
-      const container = document.getElementById("tab-fuentes");
-      const sitios = state.fuentesData.sitios || [];
-      const editingSite = state.editingId ? sitios.find(s => s.id === state.editingId) : null;
-
-      const categories = ["Medios de Comunicación", "Entidades de Gobierno", "Instituciones Gubernamentales", "Universidades", "Centros de Investigación"];
-      const catCounts = {};
-      sitios.forEach(s => { catCounts[s.categoria] = (catCounts[s.categoria] || 0) + 1; });
-
-      const filteredSitios = sitios.filter(s => {
-        if (state.fuentesCategoria && s.categoria !== state.fuentesCategoria) return false;
-        if (state.fuentesSearch) {
-          const q = state.fuentesSearch.toLowerCase();
-          const blob = `${s.nombre} ${s.categoria} ${s.subtipo || ""} ${s.localidad || ""} ${s.url_web} ${s.url_rss || ""}`.toLowerCase();
-          if (!blob.includes(q)) return false;
-        }
-        return true;
-      });
-
-      const segmentPillsHtml = [
-        `<button type="button" onclick="setFuentesCategoria('')" class="px-3 py-1.5 rounded-full text-xs font-medium border transition ${state.fuentesCategoria === "" ? "bg-sky-600 text-white border-sky-600" : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-sky-500"}">Todas (${sitios.length})</button>`,
-        ...categories.map(cat =>
-          `<button type="button" onclick="setFuentesCategoria('${escapeJs(cat)}')" class="px-3 py-1.5 rounded-full text-xs font-medium border transition ${state.fuentesCategoria === cat ? "bg-sky-600 text-white border-sky-600" : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-sky-500"}">${escapeHtml(cat)} (${catCounts[cat] || 0})</button>`
-        )
-      ].join("");
-
-      container.innerHTML = `
-        <form id="crud-form" class="rounded-xl bg-white dark:bg-slate-900 p-4 border border-slate-200/80 dark:border-slate-800 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-          <div class="sm:col-span-2 lg:col-span-3 flex items-center justify-between">
-            <h2 class="text-sm font-semibold">${editingSite ? "Editar fuente / canal RSS" : "Agregar nueva fuente / canal RSS (clasificación semántica automática)"}</h2>
-            ${editingSite ? `<button type="button" onclick="cancelEdit()" class="text-xs text-slate-500 underline">Cancelar edición</button>` : ""}
-          </div>
-          <input name="nombre" required value="${escapeAttr(editingSite?.nombre || "")}" placeholder="Nombre de la fuente"
-            class="rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 px-3 py-2 text-xs sm:text-sm" />
-          <select name="categoria" class="rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 px-3 py-2 text-xs sm:text-sm">
-            ${categories.map(c =>
-              `<option value="${escapeAttr(c)}" ${editingSite?.categoria === c ? "selected" : ""}>${escapeHtml(c)}</option>`
-            ).join("")}
-          </select>
-          <input name="localidad" value="${escapeAttr(editingSite?.localidad || "La Rioja Capital")}" placeholder="Localidad"
-            class="rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 px-3 py-2 text-xs sm:text-sm" />
-          <input name="url_web" type="url" required value="${escapeAttr(editingSite?.url_web || "")}" placeholder="https://ejemplo.gob.ar/"
-            class="rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 px-3 py-2 text-xs sm:text-sm" />
-          <input name="url_rss" value="${escapeAttr(editingSite?.url_rss || "")}" placeholder="URL RSS/Atom (opcional)"
-            class="rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 px-3 py-2 text-xs sm:text-sm" />
-          <input name="subtipo" value="${escapeAttr(editingSite?.subtipo || "")}" placeholder="Subtipo (ej. Diario, Ministerio, Facultad)"
-            class="rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 px-3 py-2 text-xs sm:text-sm" />
-          <div class="sm:col-span-2 lg:col-span-3 flex justify-end">
-            <button type="submit" class="px-4 py-2 text-xs sm:text-sm font-medium rounded-lg bg-sky-600 hover:bg-sky-500 text-white transition">
-              ${editingSite ? "Guardar cambios" : "Agregar al catálogo"}
-            </button>
-          </div>
-        </form>
-
-        <div class="rounded-xl bg-white dark:bg-slate-900 p-3.5 border border-slate-200/80 dark:border-slate-800 space-y-3">
-          <div class="flex flex-wrap gap-1.5">${segmentPillsHtml}</div>
-          <input id="fuentes-search-input" type="search" value="${escapeAttr(state.fuentesSearch)}"
-            placeholder="Filtrar entre las ${sitios.length} fuentes por nombre, localidad, subtipo o URL..."
-            class="w-full rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 px-3 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-sky-500" />
-        </div>
-
-        <div class="space-y-2.5">
-          ${filteredSitios.map(s => `
-            <div class="rounded-xl bg-white dark:bg-slate-900 p-3.5 border border-slate-200/80 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div class="min-w-0">
-                <div class="flex items-center gap-2 flex-wrap">
-                  <button type="button" onclick="openFuenteModal('${escapeJs(s.id)}', '${escapeJs(s.nombre)}')"
-                    class="text-sm font-semibold text-sky-700 dark:text-sky-400 hover:underline text-left">
-                    ${escapeHtml(s.nombre)}
-                  </button>
-                  <span class="text-[11px] px-2 py-0.5 rounded-full ${s.activo !== false ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300" : "bg-slate-200 dark:bg-slate-800 text-slate-500"}">
-                    ${s.activo !== false ? "Activo" : "Pausado"}
-                  </span>
-                  ${s.usar_rss && s.url_rss ? `<span class="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-800 dark:text-amber-300 font-medium">RSS + Crawl</span>` : `<span class="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-500">Crawl Web</span>`}
-                </div>
-                <p class="text-xs text-slate-500 dark:text-slate-400 truncate mt-0.5">
-                  ${escapeHtml(s.categoria)} · ${escapeHtml(s.subtipo || "")} · ${escapeHtml(s.localidad || "")} · ${escapeHtml(s.url_web)}
-                </p>
-              </div>
-              <div class="flex items-center gap-1.5 flex-wrap shrink-0">
-                <button type="button" onclick="openFuenteModal('${escapeJs(s.id)}', '${escapeJs(s.nombre)}')"
-                  class="px-2.5 py-1 text-xs rounded-lg bg-sky-500/15 text-sky-700 dark:text-sky-300 font-medium">
-                  Ver noticias
-                </button>
-                ${s.url_rss ? `<a href="${escapeAttr(s.url_rss)}" target="_blank" rel="noopener noreferrer" class="px-2.5 py-1 text-xs rounded-lg bg-amber-500/15 text-amber-800 dark:text-amber-300 font-medium">Feed</a>` : ""}
-                <button type="button" onclick="toggleFuente('${escapeJs(s.id)}')"
-                  class="px-2.5 py-1 text-xs rounded-lg bg-slate-100 dark:bg-slate-800 font-medium">
-                  ${s.activo !== false ? "Pausar" : "Activar"}
-                </button>
-                <button type="button" onclick="startEditFuente('${escapeJs(s.id)}')"
-                  class="px-2.5 py-1 text-xs rounded-lg bg-slate-100 dark:bg-slate-800 font-medium">
-                  Editar
-                </button>
-                <button type="button" onclick="deleteFuente('${escapeJs(s.id)}')"
-                  class="px-2.5 py-1 text-xs rounded-lg bg-rose-500/15 text-rose-700 dark:text-rose-300 font-medium">
-                  Eliminar
-                </button>
-              </div>
-            </div>
-          `).join("")}
-        </div>
-      `;
-
-      document.getElementById("crud-form").addEventListener("submit", handleCrudSubmit);
-      document.getElementById("fuentes-search-input").addEventListener("input", e => {
-        state.fuentesSearch = e.target.value;
-        renderFuentesCrud();
-        const inp = document.getElementById("fuentes-search-input");
-        if (inp) {
-          inp.focus();
-          inp.setSelectionRange(inp.value.length, inp.value.length);
-        }
-      });
-    }
-
-    function setFuentesCategoria(cat) {
-      state.fuentesCategoria = cat;
-      renderFuentesCrud();
-    }
-
-    function handleCrudSubmit(e) {
-      e.preventDefault();
-      const fd = new FormData(e.target);
-      const urlRss = (fd.get("url_rss") || "").toString().trim();
-      const payload = {
-        nombre: (fd.get("nombre") || "").toString().trim(),
-        categoria: (fd.get("categoria") || "").toString(),
-        subtipo: (fd.get("subtipo") || "Fuente Gestionada en SPA").toString().trim(),
-        localidad: (fd.get("localidad") || "La Rioja Capital").toString().trim(),
-        url_web: (fd.get("url_web") || "").toString().trim(),
-        url_rss: urlRss,
-        usar_rss: Boolean(urlRss),
-        crawl_profundidad: 3,
-        tema_por_defecto: "",
-        activo: true
-      };
-
-      if (state.editingId) {
-        const idx = state.fuentesData.sitios.findIndex(s => s.id === state.editingId);
-        if (idx >= 0) {
-          state.fuentesData.sitios[idx] = { ...state.fuentesData.sitios[idx], ...payload };
-        }
-        state.editingId = null;
-        showToast("Fuente actualizada");
-      } else {
-        state.fuentesData.sitios.unshift({
-          id: "lr-custom-" + Date.now(),
-          ...payload
-        });
-        showToast("Fuente agregada al catálogo");
-      }
-      populateCategoriaSelect();
-      renderAll();
-    }
-
-    function toggleFuente(id) {
-      const s = state.fuentesData.sitios.find(item => item.id === id);
-      if (s) {
-        s.activo = s.activo === false ? true : false;
-        showToast(s.activo ? "Fuente activada" : "Fuente pausada");
-        renderAll();
-      }
-    }
-
-    function startEditFuente(id) {
-      state.editingId = id;
-      renderFuentesCrud();
-    }
-
-    function cancelEdit() {
-      state.editingId = null;
-      renderFuentesCrud();
-    }
-
-    function deleteFuente(id) {
-      state.fuentesData.sitios = state.fuentesData.sitios.filter(item => item.id !== id);
-      if (state.editingId === id) state.editingId = null;
-      showToast("Fuente eliminada");
-      renderAll();
-    }
-
-    function openFuenteModal(fuenteId, fuenteNombre) {
-      const modal = document.getElementById("channel-modal");
-      const fuente = (state.fuentesData.sitios || []).find(s => s.id === fuenteId || s.nombre === fuenteNombre);
-      const notasFuente = (state.noticiasData.notas || []).filter(
-        n => (fuente && (n.fuente_id === fuente.id || n.fuente === fuente.nombre)) || n.fuente === fuenteNombre
-      );
-
-      document.getElementById("modal-title").textContent = fuente ? fuente.nombre : fuenteNombre;
-      document.getElementById("modal-subtitle").textContent = fuente
-        ? `${fuente.categoria} · ${fuente.subtipo || ""} · ${fuente.localidad || "La Rioja"} · ${notasFuente.length} nota(s)`
-        : `${notasFuente.length} nota(s)`;
-
-      const webLink = document.getElementById("modal-web-link");
-      if (fuente && fuente.url_web) {
-        webLink.href = fuente.url_web;
-        webLink.classList.remove("hidden");
-      } else {
-        webLink.classList.add("hidden");
-      }
-
-      const rssLink = document.getElementById("modal-rss-link");
-      if (fuente && fuente.url_rss) {
-        rssLink.href = fuente.url_rss;
-        rssLink.classList.remove("hidden");
-      } else {
-        rssLink.classList.add("hidden");
-      }
-
-      const body = document.getElementById("modal-body");
-      if (!notasFuente.length) {
-        body.innerHTML = `<p class="text-sm text-slate-500">No hay notas consolidadas registradas aún para esta fuente en la muestra actual. Ejecuta el recolector en GitHub Actions o pulsa "Actualizar ahora".</p>`;
-      } else {
-        body.innerHTML = notasFuente.map(n => `
-          <div class="rounded-xl bg-slate-50 dark:bg-slate-950 p-3.5 border border-slate-200 dark:border-slate-800 space-y-2.5">
-            ${n.imagen ? `<img src="${escapeAttr(n.imagen)}" alt="${escapeAttr(n.titulo)}" onerror="this.style.display='none'" class="w-full h-44 object-cover rounded-lg border border-slate-200/70 dark:border-slate-800" />` : ""}
-            <div class="flex items-center justify-between gap-2 text-[11px] text-slate-500">
-              <span class="font-medium text-sky-700 dark:text-sky-400">${escapeHtml(n.taxonomia || "")}</span>
-              <span>${escapeHtml(n.fecha_publicacion || "")}</span>
-            </div>
-            <h3 class="text-sm sm:text-base font-semibold">${escapeHtml(n.titulo)}</h3>
-            ${n.copete ? `<p class="text-xs font-medium text-slate-600 dark:text-slate-300">${escapeHtml(n.copete)}</p>` : ""}
-            <p class="text-xs text-slate-600 dark:text-slate-400 whitespace-pre-line leading-relaxed">${escapeHtml(n.cuerpo || "")}</p>
-            <div class="flex items-center justify-between pt-1 border-t border-slate-200/60 dark:border-slate-800">
-              <a href="${escapeAttr(n.enlace || "#")}" target="_blank" rel="noopener noreferrer" class="text-xs font-medium text-sky-600 dark:text-sky-400 hover:underline">Abrir original →</a>
-              <button type="button" onclick='copyNota(${JSON.stringify(n.id)})' class="text-xs px-2.5 py-1 rounded-lg bg-slate-200/70 dark:bg-slate-800 font-medium">Copiar contenido</button>
-            </div>
-          </div>
-        `).join("");
-      }
-
-      modal.classList.remove("hidden");
-    }
-
-    function copyNota(id) {
-      const n = (state.noticiasData.notas || []).find(item => item.id === id);
-      if (!n) return;
-      const text = `${n.titulo}\nFuente: ${n.fuente} (${n.taxonomia})\n${n.copete ? n.copete + "\n\n" : ""}${n.cuerpo || ""}\nEnlace: ${n.enlace || ""}`;
-      copyText(text, "Nota copiada");
-    }
-
-    function selectEtiqueta(tag) {
-      state.etiqueta = tag;
-      switchTab("notas");
-      renderNotas();
-    }
-
-    function clearEtiqueta() {
-      state.etiqueta = "";
-      renderNotas();
-    }
-
-    function filterByTaxonomia(tax) {
-      state.taxonomia = tax;
-      document.getElementById("filter-taxonomia").value = tax;
-      switchTab("notas");
-      renderNotas();
-    }
-
-    function switchTab(tabName) {
-      state.activeTab = tabName;
-      document.querySelectorAll(".tab-btn").forEach(btn => {
-        const active = btn.dataset.tab === tabName;
-        btn.classList.toggle("border-sky-600", active);
-        btn.classList.toggle("text-sky-600", active);
-        btn.classList.toggle("dark:text-sky-400", active);
-        btn.classList.toggle("border-transparent", !active);
-        btn.classList.toggle("text-slate-500", !active);
-      });
-
-      ["notas", "sintesis", "taxonomias", "fuentes"].forEach(t => {
-        document.getElementById(`tab-${t}`).classList.toggle("hidden", t !== tabName);
-      });
-      document.getElementById("filters-panel").classList.toggle("hidden", tabName !== "notas");
-    }
-
-    function inferTaxonomyByCategory(categoria, subtipo = "") {
-      const s = `${categoria} ${subtipo}`.toLowerCase();
-      if (s.includes("universidad") || s.includes("investigación") || s.includes("educación")) return "Ciencia, Tecnología y Educación";
-      if (s.includes("normativa") || s.includes("estadística") || s.includes("cartografía") || s.includes("control")) return "Normativa y Datos Oficiales";
-      if (s.includes("económ") || s.includes("productiv") || s.includes("energ") || s.includes("banca")) return "Economía, Finanzas y Producción";
-      if (s.includes("sanitar") || s.includes("judicial") || s.includes("salud")) return "Sociedad, Salud y Justicia";
-      if (s.includes("cultur") || s.includes("turism")) return "Cultura y Deportes";
-      return "Política y Gestión";
-    }
-
-    function simulateLiveUpdate() {
-      const now = new Date().toISOString();
-      state.noticiasData.ultima_actualizacion = now;
-      const activeSites = (state.fuentesData.sitios || []).filter(s => s.activo !== false);
-      const sampleSite = activeSites[Math.floor(Math.random() * Math.max(1, activeSites.length))];
-      if (sampleSite) {
-        const inferredTax = inferTaxonomyByCategory(sampleSite.categoria, sampleSite.subtipo);
-        const newId = "v3-live-" + Date.now();
-        state.noticiasData.notas.unshift({
-          id: newId,
-          titulo: `Actualización de monitoreo en ${sampleSite.nombre} (${sampleSite.localidad || "La Rioja"})`,
-          copete: `Verificación automática de portal y canales de ${sampleSite.categoria} (${sampleSite.subtipo || "La Rioja"}).`,
-          cuerpo: `Registro generado durante la actualización de estado de MonitorV3.1 para ${sampleSite.nombre}, clasificado dinámicamente bajo la taxonomía ${inferredTax} sin tema por defecto preasignado.`,
-          imagen: `https://placehold.co/800x420/0f172a/38bdf8?text=${encodeURIComponent(sampleSite.nombre)}`,
-          enlace: sampleSite.url_web,
-          fuente_id: sampleSite.id,
-          fuente: sampleSite.nombre,
-          categoria: sampleSite.categoria,
-          subtipo: sampleSite.subtipo || "",
-          localidad: sampleSite.localidad || "La Rioja Capital",
-          taxonomia: inferredTax,
-          etiquetas: ["monitoreo", "la rioja", sampleSite.categoria.toLowerCase()],
-          adjuntos: [],
-          fecha_publicacion: now
-        });
-      }
-      renderAll();
-      showToast("Estado y métricas actualizados");
-    }
-
-    function exportFuentesJson() {
-      const blob = new Blob([JSON.stringify(state.fuentesData, null, 2)], { type: "application/json" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "monitor_v3_fuentes.json";
-      a.click();
-      URL.revokeObjectURL(url);
-      showToast("Exportado monitor_v3_fuentes.json");
+      showToast(msg);
     }
 
     function escapeHtml(str) {
-      return String(str ?? "")
+      return String(str || "")
         .replace(/&/g, "&amp;")
         .replace(/</g, "&lt;")
         .replace(/>/g, "&gt;")
         .replace(/"/g, "&quot;");
     }
 
-    function escapeAttr(str) {
-      return escapeHtml(str).replace(/'/g, "&#39;");
-    }
+    async function cargarDatos() {
+      try {
+        const [resFuentes, resNoticias] = await Promise.all([
+          fetch("data/monitor_v3_fuentes.json"),
+          fetch("data/monitor_v3_noticias.json")
+        ]);
+        if (resFuentes.ok) state.fuentesConfig = await resFuentes.json();
+        if (resNoticias.ok) state.noticiasData = await resNoticias.json();
+      } catch (_) {}
 
-    function escapeJs(str) {
-      return String(str ?? "")
-        .replace(/\\/g, "\\\\")
-        .replace(/'/g, "\\'")
-        .replace(/\n/g, "\\n")
-        .replace(/\r/g, "");
-    }
-
-    function renderAll() {
-      renderMetrics();
-      renderNotas();
-      renderSintesis();
-      renderTaxonomias();
-      if (state.activeTab === "fuentes") {
-        renderFuentesCrud();
+      if (!state.fuentesConfig) {
+        state.fuentesConfig = {
+          version: "3.2.0-monitor-v3.2-larioja",
+          jurisdiccion: "Provincia de La Rioja, Argentina",
+          taxonomias: [
+            "Política y Gestión",
+            "Economía, Finanzas y Producción",
+            "Ciencia, Tecnología y Educación",
+            "Sociedad, Salud y Justicia",
+            "Normativa y Datos Oficiales",
+            "Cultura y Deportes"
+          ],
+          sitios: []
+        };
       }
+
+      if (!state.noticiasData) {
+        state.noticiasData = {
+          version: "3.2.0-monitor-v3.2-larioja",
+          generado_utc: new Date().toISOString(),
+          jurisdiccion: state.fuentesConfig.jurisdiccion,
+          noticias: [],
+          contenidos_vinculados: []
+        };
+      }
+
+      const totalSitios = (state.fuentesConfig.sitios || []).length;
+      const totalNotas = (state.noticiasData.noticias || []).length;
+      document.getElementById("metaJurisdiccion").textContent =
+        `${state.fuentesConfig.jurisdiccion} · ${totalSitios} fuentes · ${totalNotas} notas`;
+      render();
     }
 
-    document.querySelectorAll(".tab-btn").forEach(btn => {
-      btn.addEventListener("click", () => {
-        switchTab(btn.dataset.tab);
-        if (btn.dataset.tab === "fuentes") renderFuentesCrud();
+    function getNoticiasFiltradas() {
+      const q = state.busqueda.trim().toLowerCase();
+      return (state.noticiasData.noticias || []).filter((n) => {
+        if (state.taxonomiaFiltro !== "Todas" && n.taxonomia !== state.taxonomiaFiltro) return false;
+        if (state.etiquetaFiltro && !(n.etiquetas || []).includes(state.etiquetaFiltro)) return false;
+        if (q) {
+          const blob = `${n.titulo || ""} ${n.copete || ""} ${n.cuerpo || ""} ${n.fuente || ""} ${n.taxonomia || ""} ${(n.etiquetas || []).join(" ")}`.toLowerCase();
+          if (!blob.includes(q)) return false;
+        }
+        return true;
       });
-    });
+    }
 
-    document.getElementById("search-input").addEventListener("input", e => {
-      state.search = e.target.value;
-      renderNotas();
-    });
+    function abrirModalNota(nota) {
+      const box = document.getElementById("modalBox");
+      const textoCopia = `${nota.titulo}
 
-    document.getElementById("filter-taxonomia").addEventListener("change", e => {
-      state.taxonomia = e.target.value;
-      renderNotas();
-    });
+${nota.copete}
 
-    document.getElementById("filter-categoria").addEventListener("change", e => {
-      state.categoria = e.target.value;
-      renderNotas();
-    });
+${nota.cuerpo}
 
-    document.getElementById("btn-limpiar-filtros").addEventListener("click", () => {
-      state.search = "";
-      state.taxonomia = "";
-      state.categoria = "";
-      state.etiqueta = "";
-      document.getElementById("search-input").value = "";
-      document.getElementById("filter-taxonomia").value = "";
-      document.getElementById("filter-categoria").value = "";
-      renderNotas();
-    });
+Fuente: ${nota.fuente} (${nota.url})`;
+      box.innerHTML = `
+        <div class="modal-head">
+          <div>
+            <div class="item-meta">
+              <span class="tag-chip">${escapeHtml(nota.taxonomia)}</span>
+              <span>${escapeHtml(nota.fuente)}</span>
+              <span>· ${escapeHtml(nota.canal || "RSS")}</span>
+            </div>
+            <h2 style="font-size:18px;">${escapeHtml(nota.titulo)}</h2>
+          </div>
+          <button class="btn" id="cerrarModalBtn">Cerrar</button>
+        </div>
+        ${nota.imagen ? `<img class="modal-img" src="${escapeHtml(nota.imagen)}" alt="${escapeHtml(nota.titulo)}" />` : ""}
+        <p style="font-weight:600; color:var(--muted); margin-bottom:8px;">${escapeHtml(nota.copete || "")}</p>
+        <div class="modal-body-text">${escapeHtml(nota.cuerpo || "")}</div>
+        <div class="item-actions" style="margin-top:14px;">
+          <button class="btn btn-primary" id="copiarNotaModalBtn">Copiar contenido completo</button>
+          <button class="btn" id="copiarEnlaceModalBtn">Copiar enlace</button>
+          ${nota.url ? `<a class="btn" href="${escapeHtml(nota.url)}" target="_blank" rel="noopener">Abrir original</a>` : ""}
+        </div>
+      `;
+      document.getElementById("modalBackdrop").classList.add("open");
+      document.getElementById("cerrarModalBtn").onclick = cerrarModal;
+      document.getElementById("copiarNotaModalBtn").onclick = () => copiarTexto(textoCopia, "Nota completa copiada");
+      document.getElementById("copiarEnlaceModalBtn").onclick = () => copiarTexto(nota.url || "", "Enlace copiado");
+    }
 
-    document.getElementById("btn-simular-corrida").addEventListener("click", simulateLiveUpdate);
-    document.getElementById("btn-export-fuentes").addEventListener("click", exportFuentesJson);
-    document.getElementById("modal-close").addEventListener("click", () => {
-      document.getElementById("channel-modal").classList.add("hidden");
-    });
-    document.getElementById("channel-modal").addEventListener("click", e => {
-      if (e.target.id === "channel-modal") {
-        e.currentTarget.classList.add("hidden");
+    function abrirModalCanal(sitio) {
+      const box = document.getElementById("modalBox");
+      const todas = state.noticiasData.noticias || [];
+      let notasCanal = todas.filter((n) => (sitio.id && n.fuente_id === sitio.id) || n.fuente === sitio.nombre);
+
+      if (!notasCanal.length) {
+        notasCanal = [{
+          id: `live-${sitio.id}`,
+          fuente: sitio.nombre,
+          canal: sitio.usar_rss && sitio.url_rss ? "RSS" : "Crawl HTML",
+          titulo: `Último estado en ${sitio.nombre}`,
+          copete: `${sitio.categoria || ""} · ${sitio.subtipo || ""} · ${sitio.localidad || "La Rioja"}`,
+          cuerpo: `Canal monitoreado: ${sitio.url_web}
+Feed RSS: ${sitio.url_rss || "No configurado (rastreo HTML directo)"}
+Profundidad de crawl: ${sitio.crawl_profundidad || 3}`,
+          imagen: "",
+          url: sitio.url_web,
+          taxonomia: "Política y Gestión"
+        }];
       }
+
+      const itemsHtml = notasCanal.map((n) => {
+        const textoItem = `${n.titulo}
+
+${n.copete || ""}
+
+${n.cuerpo || ""}
+
+${n.url || ""}`;
+        return `
+          <div class="item-card ${n.imagen ? "with-thumb" : ""}" style="margin-bottom:10px;">
+            <div>
+              <div class="item-meta">
+                <span class="tag-chip">${escapeHtml(n.taxonomia || "General")}</span>
+                <span>${escapeHtml(n.canal || "RSS")}</span>
+              </div>
+              <div class="item-title">${escapeHtml(n.titulo)}</div>
+              <div class="item-copete">${escapeHtml(n.copete || "")}</div>
+              <div class="item-cuerpo-preview">${escapeHtml(n.cuerpo || "")}</div>
+              <div class="item-actions">
+                <button class="btn btn-primary copy-canal-item" data-copy="${encodeURIComponent(textoItem)}">Copiar contenido</button>
+                ${n.url ? `<a class="btn" href="${escapeHtml(n.url)}" target="_blank" rel="noopener">Abrir nota</a>` : ""}
+              </div>
+            </div>
+            ${n.imagen ? `<img class="item-thumb" src="${escapeHtml(n.imagen)}" alt="${escapeHtml(n.titulo)}" />` : ""}
+          </div>
+        `;
+      }).join("");
+
+      box.innerHTML = `
+        <div class="modal-head">
+          <div>
+            <div class="item-meta">
+              <span class="tag-chip">${escapeHtml(sitio.categoria || "Fuente")}</span>
+              <span>${escapeHtml(sitio.localidad || "La Rioja")}</span>
+            </div>
+            <h2 style="font-size:18px;">${escapeHtml(sitio.nombre)}</h2>
+            <div style="font-size:12px; color:var(--muted); margin-top:2px;">
+              ${escapeHtml(sitio.url_rss || sitio.url_web || "")}
+            </div>
+          </div>
+          <button class="btn" id="cerrarModalBtn">Cerrar</button>
+        </div>
+        <div>${itemsHtml}</div>
+      `;
+
+      document.getElementById("modalBackdrop").classList.add("open");
+      document.getElementById("cerrarModalBtn").onclick = cerrarModal;
+      box.querySelectorAll(".copy-canal-item").forEach((btn) => {
+        btn.onclick = () => copiarTexto(decodeURIComponent(btn.dataset.copy), "Contenido de nota copiado");
+      });
+    }
+
+    function cerrarModal() {
+      document.getElementById("modalBackdrop").classList.remove("open");
+    }
+
+    function renderStats() {
+      const sitios = state.fuentesConfig.sitios || [];
+      const activas = sitios.filter((s) => s.activo !== false).length;
+      const rssCount = sitios.filter((s) => s.usar_rss && s.url_rss).length;
+      const notas = state.noticiasData.noticias || [];
+      const vinculos = state.noticiasData.contenidos_vinculados || [];
+      const archivosCount = notas.reduce((acc, n) => acc + ((n.archivos && n.archivos.length) || 0), 0);
+
+      document.getElementById("statsStrip").innerHTML = `
+        <div class="stat-card"><div class="stat-num">${notas.length}</div><div class="stat-lbl">Notas consolidadas</div></div>
+        <div class="stat-card"><div class="stat-num">${activas}/${sitios.length}</div><div class="stat-lbl">Fuentes activas</div></div>
+        <div class="stat-card"><div class="stat-num">${rssCount}</div><div class="stat-lbl">Canales RSS directos</div></div>
+        <div class="stat-card"><div class="stat-num">${vinculos.length}</div><div class="stat-lbl">Contenidos vinculados</div></div>
+        <div class="stat-card"><div class="stat-num">${archivosCount}</div><div class="stat-lbl">Archivos detectados</div></div>
+      `;
+    }
+
+    function renderNotas(container) {
+      const taxonomias = ["Todas", ...(state.fuentesConfig.taxonomias || [])];
+      const pillsHtml = taxonomias.map((t) =>
+        `<button class="pill ${state.taxonomiaFiltro === t ? "active" : ""}" data-tax="${escapeHtml(t)}">${escapeHtml(t)}</button>`
+      ).join("");
+
+      const lista = getNoticiasFiltradas();
+      const cardsHtml = lista.length ? lista.map((n) => {
+        const archivosHtml = (n.archivos || []).map((a) =>
+          `<a class="file-badge" href="${escapeHtml(a.url)}" target="_blank" rel="noopener">${escapeHtml(a.extension)}: ${escapeHtml(a.nombre)}</a>`
+        ).join("");
+        const textoCopia = `${n.titulo}
+
+${n.copete || ""}
+
+${n.cuerpo || ""}
+
+${n.url || ""}`;
+
+        return `
+          <article class="item-card ${n.imagen ? "with-thumb" : ""}">
+            <div>
+              <div class="item-meta">
+                <button class="source-link abrir-fuente-btn" data-fuente="${escapeHtml(n.fuente)}">${escapeHtml(n.fuente)}</button>
+                <span>· ${escapeHtml(n.canal || "RSS")}</span>
+                <span class="tag-chip">${escapeHtml(n.taxonomia)}</span>
+                ${(n.etiquetas || []).slice(0, 3).map((e) => `<span>${escapeHtml(e)}</span>`).join("")}
+              </div>
+              <h3 class="item-title">${escapeHtml(n.titulo)}</h3>
+              <p class="item-copete">${escapeHtml(n.copete || "")}</p>
+              <div class="item-cuerpo-preview">${escapeHtml(n.cuerpo || "")}</div>
+              ${archivosHtml ? `<div class="files-row">${archivosHtml}</div>` : ""}
+              <div class="item-actions">
+                <button class="btn btn-primary ver-nota-btn" data-id="${escapeHtml(n.id)}">Leer completa</button>
+                <button class="btn copiar-nota-btn" data-copy="${encodeURIComponent(textoCopia)}">Copiar contenido</button>
+                <button class="btn copiar-enlace-btn" data-url="${escapeHtml(n.url || "")}">Copiar enlace</button>
+              </div>
+            </div>
+            ${n.imagen ? `<img class="item-thumb" src="${escapeHtml(n.imagen)}" alt="${escapeHtml(n.titulo)}" />` : ""}
+          </article>
+        `;
+      }).join("") : `<div class="empty-box">No hay notas que coincidan con el filtro actual.</div>`;
+
+      container.innerHTML = `
+        <div class="pills-row">${pillsHtml}</div>
+        ${state.etiquetaFiltro ? `<div style="margin-bottom:10px;"><button class="pill active" id="limpiarEtqBtn">Etiqueta: ${escapeHtml(state.etiquetaFiltro)} ✕</button></div>` : ""}
+        <div class="feed-list">${cardsHtml}</div>
+      `;
+
+      container.querySelectorAll(".pill[data-tax]").forEach((p) => {
+        p.onclick = () => {
+          state.taxonomiaFiltro = p.dataset.tax;
+          render();
+        };
+      });
+      const limBtn = document.getElementById("limpiarEtqBtn");
+      if (limBtn) limBtn.onclick = () => { state.etiquetaFiltro = ""; render(); };
+
+      container.querySelectorAll(".abrir-fuente-btn").forEach((b) => {
+        b.onclick = () => {
+          const sitio = (state.fuentesConfig.sitios || []).find((s) => s.nombre === b.dataset.fuente);
+          if (sitio) abrirModalCanal(sitio);
+        };
+      });
+      container.querySelectorAll(".ver-nota-btn").forEach((b) => {
+        b.onclick = () => {
+          const nota = (state.noticiasData.noticias || []).find((x) => x.id === b.dataset.id);
+          if (nota) abrirModalNota(nota);
+        };
+      });
+      container.querySelectorAll(".copiar-nota-btn").forEach((b) => {
+        b.onclick = () => copiarTexto(decodeURIComponent(b.dataset.copy), "Contenido copiado");
+      });
+      container.querySelectorAll(".copiar-enlace-btn").forEach((b) => {
+        b.onclick = () => copiarTexto(b.dataset.url, "Enlace copiado");
+      });
+    }
+
+    function renderCanales(container) {
+      const sitios = state.fuentesConfig.sitios || [];
+      const categorias = ["Todas", ...Array.from(new Set(sitios.map((s) => s.categoria).filter(Boolean)))];
+      const q = state.busqueda.trim().toLowerCase();
+
+      const pillsHtml = categorias.map((c) =>
+        `<button class="pill ${state.categoriaFuenteFiltro === c ? "active" : ""}" data-cat="${escapeHtml(c)}">${escapeHtml(c)}</button>`
+      ).join("");
+
+      const filtrados = sitios.filter((s) => {
+        if (state.categoriaFuenteFiltro !== "Todas" && s.categoria !== state.categoriaFuenteFiltro) return false;
+        if (q) {
+          const blob = `${s.nombre} ${s.categoria} ${s.subtipo} ${s.localidad} ${s.url_web} ${s.url_rss}`.toLowerCase();
+          if (!blob.includes(q)) return false;
+        }
+        return true;
+      });
+
+      const cards = filtrados.map((s) => `
+        <div class="channel-card">
+          <div>
+            <div class="item-meta">
+              <span class="status-pill ${s.activo !== false ? "status-on" : "status-off"}">${s.activo !== false ? "Activa" : "Pausada"}</span>
+              <span>${escapeHtml(s.categoria || "")}</span>
+              <span>· ${escapeHtml(s.localidad || "La Rioja")}</span>
+            </div>
+            <button class="source-link abrir-canal-modal" data-id="${escapeHtml(s.id)}" style="font-size:15px; display:block; margin-bottom:4px;">
+              ${escapeHtml(s.nombre)}
+            </button>
+            <div style="font-size:12px; color:var(--muted);">${escapeHtml(s.subtipo || "")}</div>
+            <div style="font-size:11.5px; color:var(--muted); margin-top:4px; word-break:break-all;">
+              ${escapeHtml(s.url_rss || s.url_web || "")}
+            </div>
+          </div>
+          <div class="item-actions">
+            <button class="btn btn-primary abrir-canal-modal" data-id="${escapeHtml(s.id)}">Ver noticias del canal</button>
+            <button class="btn copiar-canal-url" data-url="${escapeHtml(s.url_rss || s.url_web || "")}">Copiar URL</button>
+          </div>
+        </div>
+      `).join("");
+
+      container.innerHTML = `
+        <div class="pills-row">${pillsHtml}</div>
+        <div class="channels-grid">${cards || '<div class="empty-box">Sin fuentes en esta categoría.</div>'}</div>
+      `;
+
+      container.querySelectorAll(".pill[data-cat]").forEach((p) => {
+        p.onclick = () => {
+          state.categoriaFuenteFiltro = p.dataset.cat;
+          render();
+        };
+      });
+      container.querySelectorAll(".abrir-canal-modal").forEach((b) => {
+        b.onclick = () => {
+          const sitio = sitios.find((x) => x.id === b.dataset.id);
+          if (sitio) abrirModalCanal(sitio);
+        };
+      });
+      container.querySelectorAll(".copiar-canal-url").forEach((b) => {
+        b.onclick = () => copiarTexto(b.dataset.url, "URL copiada");
+      });
+    }
+
+    function renderVinculados(container) {
+      const vinculos = state.noticiasData.contenidos_vinculados || [];
+      if (!vinculos.length) {
+        container.innerHTML = `<div class="empty-box">No hay contenidos vinculados generados todavía.</div>`;
+        return;
+      }
+
+      container.innerHTML = `<div class="feed-list">${vinculos.map((v) => {
+        const textoCopia = `${v.titulo_original}
+
+${v.copete}
+
+${v.cuerpo_original}
+
+Fuentes: ${(v.fuentes_vinculadas || []).join(", ")}`;
+        const refsHtml = (v.notas_referenciadas || []).map((r) =>
+          `<div style="font-size:12px; margin-top:4px;">• <strong>${escapeHtml(r.fuente)}:</strong> <a href="${escapeHtml(r.url)}" target="_blank" rel="noopener">${escapeHtml(r.titulo)}</a></div>`
+        ).join("");
+
+        return `
+          <article class="item-card">
+            <div>
+              <div class="item-meta">
+                <span class="tag-chip">${escapeHtml(v.taxonomia)}</span>
+                <span>${(v.fuentes_vinculadas || []).length} fuente(s) cruzada(s)</span>
+              </div>
+              <h3 class="item-title">${escapeHtml(v.titulo_original)}</h3>
+              <p class="item-copete">${escapeHtml(v.copete || "")}</p>
+              <div class="item-cuerpo-preview" style="max-height:none;">${escapeHtml(v.cuerpo_original || "")}</div>
+              ${refsHtml ? `<div style="margin-bottom:8px;">${refsHtml}</div>` : ""}
+              <div class="item-actions">
+                <button class="btn btn-primary copiar-vinculo-btn" data-copy="${encodeURIComponent(textoCopia)}">Copiar contenido original</button>
+              </div>
+            </div>
+          </article>
+        `;
+      }).join("")}</div>`;
+
+      container.querySelectorAll(".copiar-vinculo-btn").forEach((b) => {
+        b.onclick = () => copiarTexto(decodeURIComponent(b.dataset.copy), "Contenido vinculado copiado");
+      });
+    }
+
+    function renderTaxonomias(container) {
+      const notas = state.noticiasData.noticias || [];
+      const porTax = {};
+      (state.fuentesConfig.taxonomias || []).forEach((t) => { porTax[t] = 0; });
+      const etiquetasCount = {};
+
+      notas.forEach((n) => {
+        porTax[n.taxonomia] = (porTax[n.taxonomia] || 0) + 1;
+        (n.etiquetas || []).forEach((et) => {
+          etiquetasCount[et] = (etiquetasCount[et] || 0) + 1;
+        });
+      });
+
+      const taxHtml = Object.entries(porTax).map(([tax, cant]) => `
+        <div class="channel-card">
+          <div>
+            <div class="item-title">${escapeHtml(tax)}</div>
+            <div style="font-size:12.5px; color:var(--muted);">${cant} nota(s) clasificada(s)</div>
+          </div>
+          <button class="btn btn-primary filtrar-desde-tax" data-tax="${escapeHtml(tax)}">Filtrar notas</button>
+        </div>
+      `).join("");
+
+      const etqOrdenadas = Object.entries(etiquetasCount).sort((a, b) => b[1] - a[1]);
+      const etqHtml = etqOrdenadas.map(([et, cnt]) =>
+        `<button class="pill filtrar-desde-etq" data-etq="${escapeHtml(et)}">${escapeHtml(et)} (${cnt})</button>`
+      ).join("");
+
+      container.innerHTML = `
+        <h2 style="font-size:15px; margin-bottom:10px;">Taxonomías temáticas</h2>
+        <div class="channels-grid" style="margin-bottom:18px;">${taxHtml}</div>
+        <h2 style="font-size:15px; margin-bottom:10px;">Etiquetas del día</h2>
+        <div class="pills-row" style="flex-wrap:wrap;">${etqHtml || '<span style="font-size:12.5px; color:var(--muted);">Sin etiquetas aún.</span>'}</div>
+      `;
+
+      container.querySelectorAll(".filtrar-desde-tax").forEach((b) => {
+        b.onclick = () => {
+          state.taxonomiaFiltro = b.dataset.tax;
+          state.etiquetaFiltro = "";
+          state.tab = "notas";
+          render();
+        };
+      });
+      container.querySelectorAll(".filtrar-desde-etq").forEach((b) => {
+        b.onclick = () => {
+          state.etiquetaFiltro = b.dataset.etq;
+          state.taxonomiaFiltro = "Todas";
+          state.tab = "notas";
+          render();
+        };
+      });
+    }
+
+    function renderCrud(container) {
+      const sitios = state.fuentesConfig.sitios || [];
+      const editItem = state.editandoId ? sitios.find((s) => s.id === state.editandoId) : null;
+
+      container.innerHTML = `
+        <form class="crud-form" id="crudForm">
+          <div class="field">
+            <label>Nombre de la fuente</label>
+            <input type="text" id="fNombre" required value="${escapeHtml(editItem ? editItem.nombre : "")}" placeholder="Ej: Portal La Rioja" />
+          </div>
+          <div class="field">
+            <label>Categoría</label>
+            <input type="text" id="fCategoria" required value="${escapeHtml(editItem ? editItem.categoria : "Medios de Comunicación")}" />
+          </div>
+          <div class="field">
+            <label>Subtipo</label>
+            <input type="text" id="fSubtipo" value="${escapeHtml(editItem ? editItem.subtipo : "Portal Digital")}" />
+          </div>
+          <div class="field">
+            <label>Localidad</label>
+            <input type="text" id="fLocalidad" value="${escapeHtml(editItem ? editItem.localidad : "La Rioja Capital")}" />
+          </div>
+          <div class="field">
+            <label>URL Web</label>
+            <input type="url" id="fUrlWeb" required value="${escapeHtml(editItem ? editItem.url_web : "")}" placeholder="https://..." />
+          </div>
+          <div class="field">
+            <label>URL RSS (opcional)</label>
+            <input type="url" id="fUrlRss" value="${escapeHtml(editItem ? editItem.url_rss : "")}" placeholder="https://.../feed/" />
+          </div>
+          <div class="field">
+            <label>Profundidad de crawl</label>
+            <input type="number" id="fProf" min="1" max="5" value="${editItem ? (editItem.crawl_profundidad || 3) : 3}" />
+          </div>
+          <div class="field">
+            <label>Modo de recolección</label>
+            <select id="fUsarRss">
+              <option value="true" ${editItem && editItem.usar_rss ? "selected" : ""}>Priorizar RSS + fallback HTML</option>
+              <option value="false" ${editItem && !editItem.usar_rss ? "selected" : ""}>Crawl HTML directo</option>
+            </select>
+          </div>
+          <div style="grid-column: 1 / -1; display:flex; flex-wrap:wrap; gap:8px; align-items:center;">
+            <button class="btn btn-primary" type="submit">${editItem ? "Guardar cambios" : "Agregar fuente"}</button>
+            ${editItem ? '<button class="btn" type="button" id="cancelarEditBtn">Cancelar edición</button>' : ""}
+            <button class="btn" type="button" id="exportarFuentesBtn">Descargar monitor_v3_fuentes.json</button>
+          </div>
+        </form>
+
+        <div class="feed-list">
+          ${sitios.map((s) => `
+            <div class="item-card">
+              <div>
+                <div class="item-meta">
+                  <span class="status-pill ${s.activo !== false ? "status-on" : "status-off"}">${s.activo !== false ? "Activa" : "Pausada"}</span>
+                  <span>${escapeHtml(s.categoria || "")}</span>
+                  <span>· ${escapeHtml(s.localidad || "")}</span>
+                </div>
+                <div class="item-title">${escapeHtml(s.nombre)}</div>
+                <div style="font-size:12px; color:var(--muted); word-break:break-all;">
+                  Web: ${escapeHtml(s.url_web || "")} ${s.url_rss ? `| RSS: ${escapeHtml(s.url_rss)}` : ""}
+                </div>
+              </div>
+              <div class="item-actions">
+                <button class="btn crud-edit" data-id="${escapeHtml(s.id)}">Editar</button>
+                <button class="btn crud-toggle" data-id="${escapeHtml(s.id)}">${s.activo !== false ? "Pausar" : "Activar"}</button>
+                <button class="btn btn-danger crud-del" data-id="${escapeHtml(s.id)}">Eliminar</button>
+              </div>
+            </div>
+          `).join("")}
+        </div>
+      `;
+
+      document.getElementById("crudForm").onsubmit = (e) => {
+        e.preventDefault();
+        const payload = {
+          nombre: document.getElementById("fNombre").value.trim(),
+          categoria: document.getElementById("fCategoria").value.trim(),
+          subtipo: document.getElementById("fSubtipo").value.trim(),
+          localidad: document.getElementById("fLocalidad").value.trim(),
+          url_web: document.getElementById("fUrlWeb").value.trim(),
+          url_rss: document.getElementById("fUrlRss").value.trim(),
+          crawl_profundidad: Number(document.getElementById("fProf").value || 3),
+          usar_rss: document.getElementById("fUsarRss").value === "true",
+          tema_por_defecto: "",
+          activo: editItem ? editItem.activo !== false : true
+        };
+
+        if (editItem) {
+          Object.assign(editItem, payload);
+          state.editandoId = null;
+          showToast("Fuente actualizada");
+        } else {
+          const slug = payload.nombre.toLowerCase().replace(/[^a-z0-9]+/g, "-").slice(0, 20);
+          state.fuentesConfig.sitios.push({
+            id: `lr-custom-${slug}-${Date.now().toString().slice(-4)}`,
+            ...payload
+          });
+          showToast("Fuente agregada al catálogo");
+        }
+        render();
+      };
+
+      const cancelBtn = document.getElementById("cancelarEditBtn");
+      if (cancelBtn) {
+        cancelBtn.onclick = () => {
+          state.editandoId = null;
+          render();
+        };
+      }
+
+      document.getElementById("exportarFuentesBtn").onclick = () => {
+        const blob = new Blob([JSON.stringify(state.fuentesConfig, null, 2)], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "monitor_v3_fuentes.json";
+        a.click();
+        URL.revokeObjectURL(url);
+        showToast("monitor_v3_fuentes.json descargado");
+      };
+
+      container.querySelectorAll(".crud-edit").forEach((b) => {
+        b.onclick = () => {
+          state.editandoId = b.dataset.id;
+          render();
+        };
+      });
+      container.querySelectorAll(".crud-toggle").forEach((b) => {
+        b.onclick = () => {
+          const item = sitios.find((x) => x.id === b.dataset.id);
+          if (item) {
+            item.activo = item.activo === false ? true : false;
+            render();
+            showToast(item.activo ? "Fuente activada" : "Fuente pausada");
+          }
+        };
+      });
+      container.querySelectorAll(".crud-del").forEach((b) => {
+        b.onclick = () => {
+          state.fuentesConfig.sitios = sitios.filter((x) => x.id !== b.dataset.id);
+          if (state.editandoId === b.dataset.id) state.editandoId = null;
+          render();
+          showToast("Fuente eliminada");
+        };
+      });
+    }
+
+    function render() {
+      document.querySelectorAll(".tab-btn").forEach((btn) => {
+        btn.classList.toggle("active", btn.dataset.tab === state.tab);
+      });
+      renderStats();
+      const content = document.getElementById("tabContent");
+      if (state.tab === "notas") renderNotas(content);
+      else if (state.tab === "canales") renderCanales(content);
+      else if (state.tab === "vinculados") renderVinculados(content);
+      else if (state.tab === "taxonomias") renderTaxonomias(content);
+      else if (state.tab === "crud") renderCrud(content);
+    }
+
+    document.querySelectorAll(".tab-btn").forEach((btn) => {
+      btn.onclick = () => {
+        state.tab = btn.dataset.tab;
+        render();
+      };
     });
 
-    loadInitialData();
+    document.getElementById("buscador").oninput = (e) => {
+      state.busqueda = e.target.value;
+      render();
+    };
+
+    document.getElementById("btnActualizarDemo").onclick = () => {
+      cargarDatos().then(() => showToast("Vista sincronizada"));
+    };
+
+    document.getElementById("modalBackdrop").onclick = (e) => {
+      if (e.target.id === "modalBackdrop") cerrarModal();
+    };
+
+    cargarDatos();
   </script>
 </body>
 </html>
