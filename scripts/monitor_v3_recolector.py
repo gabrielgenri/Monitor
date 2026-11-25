@@ -33,7 +33,7 @@ TRACKING_PARAMS = {
 
 FILE_EXTS = {
     "csv", "pdf", "zip", "xls", "xlsx", "dta", "dbf", "sav", "txt",
-    "jpeg", "jpg", "rar", "docx", "shp", "json", "doc", "ods", "shape", "xlsm"
+    "rar", "docx", "shp", "json", "doc", "ods", "shape", "xlsm"
 }
 
 STOPWORDS_ES = {
