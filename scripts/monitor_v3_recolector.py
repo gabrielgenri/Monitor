@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
-"""
-MonitorV3.1 Recolector Híbrido (RSS/Atom + Crawl Web + Imágenes + Adjuntos) - La Rioja, Argentina.
-Optimizado para GitHub Actions con Node.js 24 y Python 3.12.
-"""
+# -*- coding: utf-8 -*-
+"""MonitorV3.1 - Recolector hibrido RSS/Atom + Crawl HTML sin recorte de contenido."""
 
 from __future__ import annotations
 
@@ -10,479 +8,462 @@ import hashlib
 import json
 import os
 import re
-from datetime import datetime, timezone, timedelta
+import sys
+import time
+from collections import Counter, defaultdict
+from datetime import datetime, timezone
 from typing import Any
 from urllib.parse import urljoin, urlparse
 
-import bs4
 import feedparser
 import requests
-import urllib3
+from bs4 import BeautifulSoup
 
-urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-
-AR_TZ = timezone(timedelta(hours=-3))
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 FUENTES_PATH = os.path.join(BASE_DIR, "data", "monitor_v3_fuentes.json")
 NOTICIAS_PATH = os.path.join(BASE_DIR, "data", "monitor_v3_noticias.json")
 
 HEADERS = {
-    "User-Agent": (
-        "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
-        "(KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36 MonitorV3.1-LaRioja/3.1"
-    ),
-    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-    "Accept-Language": "es-AR,es;q=0.9,en;q=0.8",
+    "User-Agent": "MonitorV3.1-LaRioja/3.1 (+https://github.com/) Mozilla/5.0",
+    "Accept": "application/rss+xml, application/atom+xml, application/xml, text/xml, text/html;q=0.9, */*;q=0.8",
 }
 
-TARGET_EXTENSIONS = {
-    "csv", "pdf", "zip", "xls", "xlsx", "dta", "dbf", "sav",
-    "txt", "jpeg", "jpg", "rar", "docx", "shp", "json", "doc",
-    "ods", "shape", "xlsm"
+DEFAULT_EXTENSIONES = [
+    "html", "rss", "xml", "csv", "pdf", "zip", "xls", "xlsx", "dta", "dbf",
+    "sav", "txt", "jpeg", "jpg", "rar", "docx", "shp", "json", "doc", "ods",
+    "shape", "xlsm",
+]
+
+DEFAULT_TAXONOMIAS = [
+    "Política y Gestión",
+    "Economía, Finanzas y Producción",
+    "Ciencia, Tecnología y Educación",
+    "Sociedad, Salud y Justicia",
+    "Normativa y Datos Oficiales",
+    "Cultura y Deportes",
+]
+
+DEFAULT_REGLAS = {
+    "Política y Gestión": [
+        "gobernador", "quintela", "gabinete", "legislatura", "diputados",
+        "municipio", "intendente", "gestión", "gobierno", "ministerio",
+        "secretaría", "elecciones", "política", "reforma", "constitución",
+        "pacto", "federal",
+    ],
+    "Economía, Finanzas y Producción": [
+        "economía", "presupuesto", "impuestos", "rentas", "producción",
+        "agro", "olivo", "vid", "vino", "minería", "litio", "parque eólico",
+        "energía", "industria", "parque industrial", "comercio", "empleo",
+        "salario", "bono", "chachos", "bocade", "banco rioja", "inversión",
+        "turismo", "exportación", "pbi",
+    ],
+    "Ciencia, Tecnología y Educación": [
+        "unlar", "utn", "conicet", "crilar", "inta", "inti", "ciencia",
+        "tecnología", "investigación", "universidad", "educación", "escuela",
+        "docentes", "becas", "innovación", "software", "polo tecnológico",
+        "internet", "conectividad", "paper", "tesis",
+    ],
+    "Sociedad, Salud y Justicia": [
+        "salud", "hospital", "vera barros", "madre y el niño", "dengue",
+        "vacunación", "justicia", "tribunal", "fiscalía", "juez", "seguridad",
+        "policía", "vivienda", "agua", "ipalar", "edelap", "edelar",
+        "transporte", "rioja bus", "desarrollo social", "vecinos",
+    ],
+    "Normativa y Datos Oficiales": [
+        "boletín oficial", "ley", "decreto", "resolución", "ordenanza",
+        "licitación", "datos abiertos", "estadística", "censo", "indec",
+        "digesto", "acordada", "expediente", "pliego", "archivo", "dataset",
+        "shapefile", "cartografía", "catastro",
+    ],
+    "Cultura y Deportes": [
+        "cultura", "chaya", "festival", "música", "teatro", "feria del libro",
+        "patrimonio", "talampaya", "museo", "artesanía", "deporte", "fútbol",
+        "básquet", "riachuelo", "andino", "tesorieri", "amancay", "torneo",
+        "superdomo", "autódromo",
+    ],
 }
 
-CATEGORY_TAXONOMY_HINTS: dict[str, dict[str, int]] = {
-    "Entidades de Gobierno": {
-        "Política y Gestión": 2,
-        "Normativa y Datos Oficiales": 1,
-    },
-    "Instituciones Gubernamentales": {
-        "Política y Gestión": 1,
-        "Normativa y Datos Oficiales": 1,
-    },
-    "Universidades": {
-        "Ciencia, Tecnología y Educación": 2,
-    },
-    "Centros de Investigación": {
-        "Ciencia, Tecnología y Educación": 2,
-    },
-    "Medios de Comunicación": {
-        "Política y Gestión": 1,
-    },
-}
+
+def limpiar_texto(raw: str) -> str:
+    if not raw:
+        return ""
+    txt = BeautifulSoup(raw, "html.parser").get_text(" ", strip=True)
+    return re.sub(r"\s+", " ", txt).strip()
 
 
-def now_ar_iso() -> str:
-    return datetime.now(AR_TZ).isoformat(timespec="seconds")
+def limpiar_cuerpo(html_o_texto: str) -> str:
+    if not html_o_texto:
+        return ""
+    soup = BeautifulSoup(html_o_texto, "html.parser")
+    for bad in soup(["script", "style", "noscript", "iframe", "nav", "footer", "aside"]):
+        bad.decompose()
+    parrafos = []
+    for p in soup.find_all(["p", "h2", "h3", "li"]):
+        t = re.sub(r"\s+", " ", p.get_text(" ", strip=True)).strip()
+        if len(t) >= 25:
+            parrafos.append(t)
+    if parrafos:
+        return "\n\n".join(parrafos)
+    return re.sub(r"\s+", " ", soup.get_text(" ", strip=True)).strip()
 
 
-def clean_text(text: str, max_len: int | None = None) -> str:
-    """Normaliza espacios en blanco preservando la totalidad del contenido textual."""
-    cleaned = re.sub(r"\s+", " ", (text or "")).strip()
-    return cleaned[:max_len] if max_len else cleaned
-
-
-def clean_multiline_text(text: str) -> str:
-    """Normaliza párrafos sin recortar longitud del cuerpo de la noticia."""
-    lines = [re.sub(r"\s+", " ", line).strip() for line in (text or "").splitlines()]
-    return "\n\n".join(line for line in lines if line)
-
-
-def fetch_url(url: str, timeout: int = 14) -> requests.Response | None:
-    """Descarga una URL con tolerancia de red y SSL."""
-    if not url or not url.startswith(("http://", "https://")):
-        return None
+def obtener_url(url: str, timeout: int = 12) -> tuple[str, bytes | None]:
+    if not url:
+        return "", None
     try:
-        resp = requests.get(url, headers=HEADERS, timeout=timeout, verify=False)
-        resp.raise_for_status()
-        return resp
+        resp = requests.get(url, headers=HEADERS, timeout=timeout, allow_redirects=True)
+        if resp.status_code == 200 and resp.content:
+            return resp.url, resp.content
     except Exception:
-        return None
+        pass
+    return url, None
 
 
-def extract_best_image(soup: bs4.BeautifulSoup, base_url: str) -> str:
-    """Extrae la imagen principal de la nota (OpenGraph, Twitter Card o <img> relevante)."""
-    for prop in ("og:image", "og:image:secure_url"):
-        tag = soup.find("meta", property=prop)
-        if tag and tag.get("content"):
-            return urljoin(base_url, tag["content"].strip())
+def es_imagen_valida(url_img: str) -> bool:
+    if not url_img:
+        return False
+    low = url_img.lower()
+    if low.startswith("data:image/svg+xml"):
+        return False
+    if any(skip in low for skip in ["pixel", "tracker", "1x1", "spacer", "gravatar", "emoji", "sprite"]):
+        return False
+    return low.startswith("http://") or low.startswith("https://") or low.startswith("data:image/")
 
-    for attr_name in ("twitter:image", "twitter:image:src"):
-        tag = soup.find("meta", attrs={"name": attr_name})
-        if tag and tag.get("content"):
-            return urljoin(base_url, tag["content"].strip())
 
-    container = soup.find("article") or soup.find("main") or soup.body or soup
-    for img_tag in container.find_all("img"):
-        src = (
-            img_tag.get("data-src")
-            or img_tag.get("data-lazy-src")
-            or img_tag.get("src")
-            or ""
-        ).strip()
-        if not src or src.startswith("data:"):
-            continue
-        low_src = src.lower()
-        if any(skip in low_src for skip in ("logo", "icon", "sprite", "avatar", "pixel", "spinner", "emoji")):
-            continue
-        return urljoin(base_url, src)
+def extraer_imagen_item(entry: dict[str, Any], soup_item: BeautifulSoup | None, base_url: str) -> str:
+    for attr in ("media_content", "media_thumbnail"):
+        items = entry.get(attr) or []
+        if isinstance(items, list):
+            for m in items:
+                u = (m.get("url") or "").strip()
+                if es_imagen_valida(u):
+                    return urljoin(base_url, u)
+
+    for enc in entry.get("enclosures") or []:
+        u = (enc.get("href") or enc.get("url") or "").strip()
+        mime = (enc.get("type") or "").lower()
+        if ("image" in mime or re.search(r"\.(jpe?g|png|webp|gif)(\?|$)", u.lower())) and es_imagen_valida(u):
+            return urljoin(base_url, u)
+
+    for link in entry.get("links") or []:
+        if (link.get("type") or "").startswith("image/"):
+            u = (link.get("href") or "").strip()
+            if es_imagen_valida(u):
+                return urljoin(base_url, u)
+
+    if soup_item:
+        for meta_name in ["og:image", "twitter:image", "twitter:image:src"]:
+            tag = soup_item.find("meta", attrs={"property": meta_name}) or soup_item.find("meta", attrs={"name": meta_name})
+            if tag and tag.get("content"):
+                u = urljoin(base_url, tag["content"].strip())
+                if es_imagen_valida(u):
+                    return u
+
+        for img in soup_item.find_all("img"):
+            u = (img.get("data-src") or img.get("data-lazy-src") or img.get("src") or "").strip()
+            if not u:
+                continue
+            full_u = urljoin(base_url, u)
+            if es_imagen_valida(full_u):
+                return full_u
 
     return ""
 
 
-def extract_rss_entry_image(entry: Any, base_url: str) -> str:
-    """Extrae imagen desde media:content, media:thumbnail, enclosures o <img> embebido en el ítem RSS."""
-    if entry.get("media_content"):
-        for media in entry["media_content"]:
-            if media.get("url"):
-                return urljoin(base_url, media["url"].strip())
-    if entry.get("media_thumbnail"):
-        for thumb in entry["media_thumbnail"]:
-            if thumb.get("url"):
-                return urljoin(base_url, thumb["url"].strip())
-    if entry.get("enclosures"):
-        for enc in entry["enclosures"]:
-            href = enc.get("href") or enc.get("url") or ""
-            ftype = (enc.get("type") or "").lower()
-            if href and (ftype.startswith("image/") or any(href.lower().endswith(ext) for ext in (".jpg", ".jpeg", ".png", ".webp"))):
-                return urljoin(base_url, href.strip())
-
-    raw_html_blocks = [entry.get("summary") or ""]
-    for c in entry.get("content") or []:
-        raw_html_blocks.append(c.get("value") or "")
-    for block in raw_html_blocks:
-        if "<img" in block.lower():
-            soup = bs4.BeautifulSoup(block, "html.parser")
-            img = soup.find("img", src=True)
-            if img and img.get("src"):
-                return urljoin(base_url, img["src"].strip())
-    return ""
-
-
-def extract_attachments(soup: bs4.BeautifulSoup, base_url: str) -> list[dict[str, str]]:
-    """Detecta todos los enlaces a archivos y datasets con extensiones objetivo."""
-    found: list[dict[str, str]] = []
-    seen_urls: set[str] = set()
-    for a_tag in soup.find_all("a", href=True):
-        full_url = urljoin(base_url, a_tag["href"].strip())
-        if full_url in seen_urls:
+def detectar_archivos(urls_candidatas: list[str], extensiones: list[str], base_url: str) -> list[dict[str, str]]:
+    exts = {e.lower().lstrip(".") for e in extensiones if e.lower().lstrip(".") not in {"html", "rss", "xml"}}
+    encontrados: dict[str, dict[str, str]] = {}
+    for u in urls_candidatas:
+        if not u:
             continue
-        parsed_path = urlparse(full_url).path.lower()
-        ext = parsed_path.rsplit(".", 1)[-1] if "." in parsed_path else ""
-        if ext in TARGET_EXTENSIONS:
-            seen_urls.add(full_url)
-            file_name = os.path.basename(urlparse(full_url).path) or f"recurso.{ext}"
-            label = clean_text(a_tag.get_text(" ")) or file_name
-            found.append({
-                "url": full_url,
-                "extension": ext.upper(),
-                "nombre_archivo": file_name,
-                "extracto": label,
-            })
-    return found
-
-
-def crawl_article_details(url: str) -> tuple[str, str, str, list[dict[str, str]]]:
-    """Recupera copete, cuerpo completo sin restricción de longitud, imagen y adjuntos de una URL."""
-    resp = fetch_url(url, timeout=14)
-    if not resp:
-        return "", "", "", []
-
-    soup = bs4.BeautifulSoup(resp.text, "html.parser")
-    image_url = extract_best_image(soup, url)
-
-    meta_desc = soup.find("meta", property="og:description") or soup.find("meta", attrs={"name": "description"})
-    copete = clean_text(meta_desc.get("content", "") if meta_desc else "")
-
-    for tag in soup(["script", "style", "noscript", "svg", "footer", "nav", "aside"]):
-        tag.decompose()
-
-    container = soup.find("article") or soup.find("main") or soup.body or soup
-    paragraphs: list[str] = []
-    seen_p: set[str] = set()
-    for p in container.find_all(["p", "li"]):
-        txt = clean_text(p.get_text(" "))
-        if len(txt) >= 30 and txt not in seen_p:
-            seen_p.add(txt)
-            paragraphs.append(txt)
-
-    body_text = "\n\n".join(paragraphs)
-    if not copete and paragraphs:
-        copete = paragraphs[0]
-
-    attachments = extract_attachments(soup, url)
-    return copete, body_text, image_url, attachments
-
-
-def classify_text(
-    text: str,
-    rules: dict[str, list[str]],
-    categoria: str = "",
-    subtipo: str = "",
-    tema_por_defecto: str = "",
-) -> tuple[str, list[str]]:
-    """Clasifica el contenido ponderando reglas léxicas, categoría y subtipo de fuente sin requerir tema_por_defecto."""
-    low = f"{text} {categoria} {subtipo}".lower()
-    scores: dict[str, int] = {tax: 0 for tax in rules.keys()}
-    matched_tags: list[str] = []
-
-    for tax, keywords in rules.items():
-        hits = [kw for kw in keywords if kw.lower() in low]
-        scores[tax] = scores.get(tax, 0) + (len(hits) * 3)
-        matched_tags.extend(hits)
-
-    for tax_hint, bonus in CATEGORY_TAXONOMY_HINTS.get(categoria, {}).items():
-        if tax_hint in scores:
-            scores[tax_hint] += bonus
-
-    sub_low = (subtipo or "").lower()
-    if any(k in sub_low for k in ("normativa", "estadística", "cartografía", "control", "legislativo")):
-        scores["Normativa y Datos Oficiales"] = scores.get("Normativa y Datos Oficiales", 0) + 3
-    if any(k in sub_low for k in ("económ", "tributar", "productiv", "energ", "banca", "vitivin")):
-        scores["Economía, Finanzas y Producción"] = scores.get("Economía, Finanzas y Producción", 0) + 3
-    if any(k in sub_low for k in ("sanitar", "judicial", "seguridad social")):
-        scores["Sociedad, Salud y Justicia"] = scores.get("Sociedad, Salud y Justicia", 0) + 3
-    if any(k in sub_low for k in ("cultur", "turístic")):
-        scores["Cultura y Deportes"] = scores.get("Cultura y Deportes", 0) + 3
-    if any(k in sub_low for k in ("científ", "investig", "universidad", "tecnológ", "educativ")):
-        scores["Ciencia, Tecnología y Educación"] = scores.get("Ciencia, Tecnología y Educación", 0) + 3
-
-    best_tax = tema_por_defecto.strip() if tema_por_defecto and tema_por_defecto.strip() else "Política y Gestión"
-    best_score = -1
-    for tax, sc in scores.items():
-        if sc > best_score:
-            best_score = sc
-            best_tax = tax
-
-    extra_candidates = [
-        "la rioja", "chilecito", "chepes", "chamical", "aimogasta", "arauco",
-        "unlar", "undec", "conicet", "crilar", "boletín oficial", "gestión",
-        "salud", "economía", "educación", "cultura", "deportes"
-    ]
-    for cand in extra_candidates:
-        if cand in low and cand not in matched_tags:
-            matched_tags.append(cand)
-
-    unique_tags = list(dict.fromkeys(t.lower() for t in matched_tags))[:10]
-    return best_tax, unique_tags
-
-
-def discover_internal_links(soup: bs4.BeautifulSoup, base_url: str, depth: int = 3) -> list[tuple[str, str]]:
-    """Descubre enlaces de notas dentro del mismo dominio según la profundidad configurada."""
-    domain = urlparse(base_url).netloc
-    max_links = max(5, depth * 5)
-    discovered: list[tuple[str, str]] = []
-    seen: set[str] = set()
-
-    for a_tag in soup.find_all("a", href=True):
-        href = urljoin(base_url, a_tag["href"].strip())
-        parsed = urlparse(href)
-        if parsed.scheme not in ("http", "https") or parsed.netloc != domain:
-            continue
-        if href.rstrip("/") == base_url.rstrip("/") or href in seen:
-            continue
-        title_txt = clean_text(a_tag.get_text(" "))
-        path_clean = parsed.path.strip("/")
-        if len(path_clean) > 10 and len(title_txt) >= 24:
-            seen.add(href)
-            discovered.append((href, title_txt))
-            if len(discovered) >= max_links:
-                break
-    return discovered
-
-
-def collect_from_site(site: dict[str, Any], rules: dict[str, list[str]], timestamp: str) -> list[dict[str, Any]]:
-    """Recolecta todas las notas disponibles desde RSS/Atom y/o crawl directo del sitio sin truncar cuerpo."""
-    items: list[dict[str, Any]] = []
-    categoria = site.get("categoria", "Medios de Comunicación")
-    subtipo = site.get("subtipo", "")
-    default_tax = (site.get("tema_por_defecto") or "").strip()
-    crawl_depth = int(site.get("crawl_profundidad") or 3)
-    candidates: list[dict[str, str]] = []
-
-    if site.get("usar_rss") and site.get("url_rss"):
-        rss_resp = fetch_url(site["url_rss"], timeout=14)
-        if rss_resp:
-            parsed = feedparser.parse(rss_resp.content)
-            for entry in parsed.entries:
-                link = (entry.get("link") or site.get("url_web") or "").strip()
-                title = clean_text(entry.get("title") or "")
-                raw_content = ""
-                if entry.get("content"):
-                    raw_content = " ".join(c.get("value") or "" for c in entry["content"])
-                summary_html = raw_content or (entry.get("summary") or "")
-                summary_txt = clean_multiline_text(bs4.BeautifulSoup(summary_html, "html.parser").get_text("\n"))
-                img = extract_rss_entry_image(entry, link or site.get("url_web", ""))
-                if title and link:
-                    candidates.append({
-                        "titulo": title,
-                        "copete": clean_text(bs4.BeautifulSoup(entry.get("summary") or "", "html.parser").get_text(" ")),
-                        "cuerpo": summary_txt,
-                        "imagen": img,
-                        "enlace": link,
-                        "fecha": entry.get("published") or entry.get("updated") or timestamp,
-                    })
-
-    if not candidates and site.get("url_web"):
-        web_resp = fetch_url(site["url_web"], timeout=14)
-        if web_resp:
-            soup = bs4.BeautifulSoup(web_resp.text, "html.parser")
-            discovered = discover_internal_links(soup, site["url_web"], depth=crawl_depth)
-            for href, anchor_title in discovered:
-                candidates.append({
-                    "titulo": anchor_title,
-                    "copete": "",
-                    "cuerpo": "",
-                    "imagen": "",
-                    "enlace": href,
-                    "fecha": timestamp,
-                })
-            if not candidates:
-                title_tag = soup.find("title")
-                page_title = clean_text(title_tag.get_text(" ") if title_tag else site["nombre"])
-                candidates.append({
-                    "titulo": page_title or site["nombre"],
-                    "copete": "",
-                    "cuerpo": "",
-                    "imagen": extract_best_image(soup, site["url_web"]),
-                    "enlace": site["url_web"],
-                    "fecha": timestamp,
-                })
-
-    for cand in candidates:
-        copete = cand["copete"]
-        cuerpo = cand["cuerpo"]
-        imagen = cand["imagen"]
-        adjuntos: list[dict[str, str]] = []
-
-        if cand["enlace"]:
-            crawled_copete, full_body, crawled_img, found_files = crawl_article_details(cand["enlace"])
-            if len(full_body) > len(cuerpo):
-                cuerpo = full_body
-            if not copete and crawled_copete:
-                copete = crawled_copete
-            if not imagen and crawled_img:
-                imagen = crawled_img
-            adjuntos = found_files
-
-        if not copete and cuerpo:
-            copete = cuerpo.split("\n\n")[0]
-
-        combined_text = f"{cand['titulo']} {copete} {cuerpo}"
-        taxonomia, etiquetas = classify_text(
-            combined_text,
-            rules,
-            categoria=categoria,
-            subtipo=subtipo,
-            tema_por_defecto=default_tax,
-        )
-        uid = hashlib.sha256(f"{site['id']}|{cand['enlace']}|{cand['titulo']}".encode("utf-8")).hexdigest()[:12]
-
-        items.append({
-            "id": f"v3-{uid}",
-            "titulo": cand["titulo"],
-            "copete": copete,
-            "cuerpo": cuerpo or copete or cand["titulo"],
-            "imagen": imagen,
-            "enlace": cand["enlace"],
-            "fuente_id": site["id"],
-            "fuente": site["nombre"],
-            "categoria": categoria,
-            "subtipo": subtipo,
-            "localidad": site.get("localidad", "La Rioja Capital"),
-            "taxonomia": taxonomia,
-            "etiquetas": etiquetas,
-            "adjuntos": adjuntos,
-            "fecha_publicacion": cand.get("fecha") or timestamp,
-            "fecha_recoleccion": timestamp,
-        })
-
-    return items
-
-
-def build_cross_channel_synthesis(notas: list[dict[str, Any]], taxonomies: list[str], timestamp: str) -> list[dict[str, Any]]:
-    """Genera síntesis originales cross-canal vinculando fuentes distintas bajo cada taxonomía."""
-    syntheses: list[dict[str, Any]] = []
-    for idx, tax in enumerate(taxonomies, start=1):
-        group = [n for n in notas if n.get("taxonomia") == tax]
-        if not group:
-            continue
-        unique_sources = list(dict.fromkeys(n["fuente"] for n in group))
-        top_items = group[:6]
-        tags_pool: list[str] = []
-        for n in top_items:
-            tags_pool.extend(n.get("etiquetas") or [])
-        unique_tags = list(dict.fromkeys(tags_pool))[:8]
-
-        bullets = "\n\n".join(
-            f"• [{n['fuente']}] {n['titulo']}: {clean_text(n.get('copete') or n.get('cuerpo') or '', 280)}"
-            for n in top_items
-        )
-        fuentes_str = ", ".join(unique_sources[:5])
-        cuerpo_original = (
-            f"Síntesis automática de MonitorV3.1 para La Rioja en el eje '{tax}', "
-            f"integrando registros de {fuentes_str}.\n\n{bullets}"
-        )
-
-        syntheses.append({
-            "id": f"v3-sintesis-{idx:02d}",
-            "taxonomia": tax,
-            "fecha_generacion": timestamp,
-            "titulo_original": f"Síntesis Cross-Canal · {tax}",
-            "copete": f"Vinculación temática de {len(unique_sources)} fuente(s) en La Rioja sobre {tax.lower()}.",
-            "cuerpo_original": cuerpo_original,
-            "etiquetas_vinculadas": unique_tags,
-            "fuentes_cruzadas": [
-                {
-                    "id_nota": n["id"],
-                    "titulo": n["titulo"],
-                    "fuente": n["fuente"],
-                    "enlace": n["enlace"],
+        abs_u = urljoin(base_url, u.strip())
+        path = urlparse(abs_u).path.lower()
+        m = re.search(r"\.([a-z0-9]{2,6})$", path)
+        if m:
+            ext = m.group(1)
+            if ext in exts and abs_u not in encontrados:
+                nombre_arch = os.path.basename(urlparse(abs_u).path) or f"archivo.{ext}"
+                encontrados[abs_u] = {
+                    "nombre": nombre_arch,
+                    "extension": ext.upper(),
+                    "url": abs_u,
                 }
-                for n in top_items
-            ],
+    return list(encontrados.values())
+
+
+def clasificar_nota(texto_completo: str, sitio: dict[str, Any], reglas: dict[str, list[str]], taxonomias: list[str]) -> tuple[str, list[str]]:
+    txt_lower = texto_completo.lower()
+    puntajes: Counter[str] = Counter()
+    etiquetas: list[str] = []
+
+    for tax in taxonomias:
+        kws = reglas.get(tax, [])
+        for kw in kws:
+            kw_l = kw.lower().strip()
+            if not kw_l:
+                continue
+            if re.search(r"\b" + re.escape(kw_l) + r"\b", txt_lower) or kw_l in txt_lower:
+                puntajes[tax] += 1
+                etiqueta_fmt = "#" + re.sub(r"[^a-z0-9áéíóúñ]+", "", kw_l)
+                if len(etiqueta_fmt) > 1 and etiqueta_fmt not in etiquetas:
+                    etiquetas.append(etiqueta_fmt)
+
+    categoria_fuente = (sitio.get("categoria") or "").lower()
+    subtipo_fuente = (sitio.get("subtipo") or "").lower()
+    if "universidad" in categoria_fuente or "investigación" in categoria_fuente or "ciencia" in subtipo_fuente or "tecnología" in subtipo_fuente:
+        puntajes["Ciencia, Tecnología y Educación"] += 1
+    elif "estadística" in subtipo_fuente or "boletín" in subtipo_fuente or "geodatos" in subtipo_fuente or "control" in subtipo_fuente:
+        puntajes["Normativa y Datos Oficiales"] += 1
+    elif "económico" in subtipo_fuente or "hacienda" in subtipo_fuente or "productiva" in subtipo_fuente or "banca" in subtipo_fuente or "energética" in subtipo_fuente:
+        puntajes["Economía, Finanzas y Producción"] += 1
+    elif "sanitaria" in subtipo_fuente or "judicial" in subtipo_fuente or "seguridad social" in subtipo_fuente:
+        puntajes["Sociedad, Salud y Justicia"] += 1
+    elif "cultural" in subtipo_fuente or "turística" in subtipo_fuente:
+        puntajes["Cultura y Deportes"] += 1
+    elif "gobierno" in categoria_fuente:
+        puntajes["Política y Gestión"] += 1
+
+    if puntajes:
+        mejor_tax = puntajes.most_common(1)[0][0]
+    else:
+        mejor_tax = taxonomias[0] if taxonomias else "Política y Gestión"
+
+    if not etiquetas:
+        etiquetas = ["#larioja", "#" + re.sub(r"[^a-z0-9]+", "", mejor_tax.lower())[:18]]
+
+    return mejor_tax, etiquetas[:8]
+
+
+def construir_contenidos_vinculados(noticias: list[dict[str, Any]], taxonomias: list[str]) -> list[dict[str, Any]]:
+    por_tax: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    for n in noticias:
+        por_tax[n["taxonomia"]].append(n)
+
+    vinculados: list[dict[str, Any]] = []
+    for idx, tax in enumerate(taxonomias, start=1):
+        grupo = por_tax.get(tax, [])
+        if not grupo:
+            continue
+        fuentes_unicas = []
+        refs = []
+        extractos = []
+        for item in grupo:
+            if item["fuente"] not in fuentes_unicas:
+                fuentes_unicas.append(item["fuente"])
+            refs.append({
+                "id": item["id"],
+                "fuente": item["fuente"],
+                "titulo": item["titulo"],
+                "url": item["url"],
+                "fecha": item["fecha"],
+            })
+            extractos.append(f"[{item['fuente']}] {item['titulo']}: {item['copete']}")
+
+        titulo_orig = f"Síntesis de {tax}: {len(grupo)} registros en {len(fuentes_unicas)} fuentes de La Rioja"
+        copete_orig = (
+            f"Cruce temático en {tax} consolidando aportes de {', '.join(fuentes_unicas[:5])}"
+            f"{' y otras fuentes' if len(fuentes_unicas) > 5 else ''}."
+        )
+        cuerpo_orig = (
+            f"Análisis consolidado de MonitorV3.1 para el eje «{tax}» en la Provincia de La Rioja.\n\n"
+            + "\n\n".join(extractos)
+        )
+        vinculados.append({
+            "id": f"vinculo-{idx:02d}",
+            "taxonomia": tax,
+            "titulo_original": titulo_orig,
+            "copete": copete_orig,
+            "cuerpo_original": cuerpo_orig,
+            "fuentes_vinculadas": fuentes_unicas,
+            "notas_referenciadas": refs,
         })
-    return syntheses
+    return vinculados
 
 
-def main() -> None:
-    timestamp = now_ar_iso()
+def recolectar_sitio(sitio: dict[str, Any], reglas: dict[str, list[str]], taxonomias: list[str], extensiones: list[str]) -> list[dict[str, Any]]:
+    notas: list[dict[str, Any]] = []
+    nombre_sitio = sitio.get("nombre", "Fuente sin nombre")
+    url_web = sitio.get("url_web", "")
+    url_rss = sitio.get("url_rss", "")
+    usar_rss = bool(sitio.get("usar_rss") and url_rss)
+    profundidad = int(sitio.get("crawl_profundidad", 2) or 2)
+    ahora_iso = datetime.now(timezone.utc).isoformat()
+
+    if usar_rss:
+        _, raw_rss = obtener_url(url_rss)
+        if raw_rss:
+            parsed = feedparser.parse(raw_rss)
+            for entry in parsed.entries:
+                titulo = limpiar_texto(entry.get("title") or "Sin título")
+                enlace = urljoin(url_rss, (entry.get("link") or url_web or "").strip())
+                resumen_raw = ""
+                if entry.get("content") and isinstance(entry["content"], list):
+                    resumen_raw = entry["content"][0].get("value") or ""
+                if not resumen_raw:
+                    resumen_raw = entry.get("summary") or entry.get("description") or ""
+
+                soup_resumen = BeautifulSoup(resumen_raw, "html.parser") if resumen_raw else None
+                copete = limpiar_texto(resumen_raw)
+                cuerpo = limpiar_cuerpo(resumen_raw)
+                imagen = extraer_imagen_item(entry, soup_resumen, enlace or url_web)
+
+                candidatos_arch = [
+                    (l.get("href") or "") for l in (entry.get("links") or [])
+                ] + [
+                    (e.get("href") or e.get("url") or "") for e in (entry.get("enclosures") or [])
+                ]
+                if soup_resumen:
+                    candidatos_arch.extend([(a.get("href") or "") for a in soup_resumen.find_all("a")])
+
+                if enlace and enlace.startswith("http"):
+                    _, raw_nota = obtener_url(enlace, timeout=10)
+                    if raw_nota:
+                        soup_nota = BeautifulSoup(raw_nota, "html.parser")
+                        cuerpo_nota = limpiar_cuerpo(raw_nota)
+                        if len(cuerpo_nota) > len(cuerpo):
+                            cuerpo = cuerpo_nota
+                        if not copete and cuerpo:
+                            copete = cuerpo[:280]
+                        if not imagen:
+                            imagen = extraer_imagen_item({}, soup_nota, enlace)
+                        candidatos_arch.extend([(a.get("href") or "") for a in soup_nota.find_all("a")])
+
+                archivos = detectar_archivos(candidatos_arch, extensiones, enlace or url_web)
+                tax, etiquetas = clasificar_nota(f"{titulo} {copete} {cuerpo}", sitio, reglas, taxonomias)
+                uid = hashlib.sha1(f"{nombre_sitio}|{titulo}|{enlace}".encode("utf-8")).hexdigest()[:12]
+
+                notas.append({
+                    "id": f"nota-{uid}",
+                    "fuente_id": sitio.get("id", ""),
+                    "fuente": nombre_sitio,
+                    "categoria": sitio.get("categoria", ""),
+                    "subtipo": sitio.get("subtipo", ""),
+                    "localidad": sitio.get("localidad", "La Rioja"),
+                    "canal": "RSS",
+                    "titulo": titulo,
+                    "copete": copete or (cuerpo[:240] if cuerpo else titulo),
+                    "cuerpo": cuerpo or copete or titulo,
+                    "imagen": imagen,
+                    "url": enlace or url_web,
+                    "fecha": entry.get("published") or entry.get("updated") or ahora_iso,
+                    "taxonomia": tax,
+                    "etiquetas": etiquetas,
+                    "archivos": archivos,
+                })
+
+    if not notas and url_web:
+        _, raw_web = obtener_url(url_web)
+        if raw_web:
+            soup_web = BeautifulSoup(raw_web, "html.parser")
+            titulo_pag = limpiar_texto(soup_web.title.string if soup_web.title and soup_web.title.string else nombre_sitio)
+            cuerpo_pag = limpiar_cuerpo(raw_web)
+            imagen_pag = extraer_imagen_item({}, soup_web, url_web)
+            enlaces_pag = [(a.get("href") or "") for a in soup_web.find_all("a")]
+            archivos_pag = detectar_archivos(enlaces_pag, extensiones, url_web)
+
+            if profundidad >= 2:
+                visitados = {url_web}
+                for raw_href in enlaces_pag[:25]:
+                    abs_h = urljoin(url_web, raw_href.strip())
+                    if abs_h in visitados or urlparse(abs_h).netloc != urlparse(url_web).netloc:
+                        continue
+                    visitados.add(abs_h)
+                    _, raw_sub = obtener_url(abs_h, timeout=8)
+                    if raw_sub:
+                        soup_sub = BeautifulSoup(raw_sub, "html.parser")
+                        h1_tag = soup_sub.find(["h1", "h2"])
+                        t_sub = limpiar_texto(h1_tag.get_text(" ", strip=True)) if h1_tag else titulo_pag
+                        c_sub = limpiar_cuerpo(raw_sub)
+                        img_sub = extraer_imagen_item({}, soup_sub, abs_h)
+                        arch_sub = detectar_archivos([(a.get("href") or "") for a in soup_sub.find_all("a")], extensiones, abs_h)
+                        if len(c_sub) >= 80 or arch_sub:
+                            tax_s, etq_s = clasificar_nota(f"{t_sub} {c_sub}", sitio, reglas, taxonomias)
+                            uid_s = hashlib.sha1(f"{nombre_sitio}|{t_sub}|{abs_h}".encode("utf-8")).hexdigest()[:12]
+                            notas.append({
+                                "id": f"nota-{uid_s}",
+                                "fuente_id": sitio.get("id", ""),
+                                "fuente": nombre_sitio,
+                                "categoria": sitio.get("categoria", ""),
+                                "subtipo": sitio.get("subtipo", ""),
+                                "localidad": sitio.get("localidad", "La Rioja"),
+                                "canal": "Crawl HTML",
+                                "titulo": t_sub,
+                                "copete": c_sub[:260] if c_sub else t_sub,
+                                "cuerpo": c_sub or t_sub,
+                                "imagen": img_sub or imagen_pag,
+                                "url": abs_h,
+                                "fecha": ahora_iso,
+                                "taxonomia": tax_s,
+                                "etiquetas": etq_s,
+                                "archivos": arch_sub,
+                            })
+
+            if not notas:
+                tax_p, etq_p = clasificar_nota(f"{titulo_pag} {cuerpo_pag}", sitio, reglas, taxonomias)
+                uid_p = hashlib.sha1(f"{nombre_sitio}|{titulo_pag}|{url_web}".encode("utf-8")).hexdigest()[:12]
+                notas.append({
+                    "id": f"nota-{uid_p}",
+                    "fuente_id": sitio.get("id", ""),
+                    "fuente": nombre_sitio,
+                    "categoria": sitio.get("categoria", ""),
+                    "subtipo": sitio.get("subtipo", ""),
+                    "localidad": sitio.get("localidad", "La Rioja"),
+                    "canal": "Crawl HTML",
+                    "titulo": titulo_pag,
+                    "copete": cuerpo_pag[:260] if cuerpo_pag else titulo_pag,
+                    "cuerpo": cuerpo_pag or titulo_pag,
+                    "imagen": imagen_pag,
+                    "url": url_web,
+                    "fecha": ahora_iso,
+                    "taxonomia": tax_p,
+                    "etiquetas": etq_p,
+                    "archivos": archivos_pag,
+                })
+
+    return notas
+
+
+def main() -> int:
+    t0 = time.time()
+    if not os.path.exists(FUENTES_PATH):
+        print(f"No se encontro {FUENTES_PATH}", file=sys.stderr)
+        return 1
+
     with open(FUENTES_PATH, "r", encoding="utf-8") as f:
-        fuentes_cfg = json.load(f)
+        config = json.load(f)
 
-    rules: dict[str, list[str]] = fuentes_cfg.get("reglas_clasificacion", {})
-    taxonomies: list[str] = fuentes_cfg.get("taxonomias", list(rules.keys()))
-    sitios: list[dict[str, Any]] = fuentes_cfg.get("sitios", [])
+    sitios = [s for s in config.get("sitios", []) if s.get("activo", True)]
+    reglas = config.get("reglas_clasificacion") or DEFAULT_REGLAS
+    taxonomias = config.get("taxonomias") or DEFAULT_TAXONOMIAS
+    extensiones = config.get("extensiones_objetivo") or DEFAULT_EXTENSIONES
 
-    previous_notas: list[dict[str, Any]] = []
-    if os.path.exists(NOTICIAS_PATH):
+    todas_notas: list[dict[str, Any]] = []
+    for sitio in sitios:
         try:
-            with open(NOTICIAS_PATH, "r", encoding="utf-8") as f:
-                prev_data = json.load(f)
-                previous_notas = prev_data.get("notas", [])
-        except Exception:
-            previous_notas = []
+            items = recolectar_sitio(sitio, reglas, taxonomias, extensiones)
+            todas_notas.extend(items)
+            print(f"[OK] {sitio.get('nombre')}: {len(items)} notas")
+        except Exception as exc:
+            print(f"[WARN] {sitio.get('nombre')}: {exc}", file=sys.stderr)
 
-    collected: list[dict[str, Any]] = []
-    active_sites = [s for s in sitios if s.get("activo", True)]
-    for site in active_sites:
-        collected.extend(collect_from_site(site, rules, timestamp))
-
-    merged_by_id: dict[str, dict[str, Any]] = {}
-    for item in collected:
-        merged_by_id[item["id"]] = item
-    for prev in previous_notas:
-        if prev.get("id") and prev["id"] not in merged_by_id:
-            merged_by_id[prev["id"]] = prev
-
-    final_notas = list(merged_by_id.values())
-    contenidos_vinculados = build_cross_channel_synthesis(final_notas, taxonomies, timestamp)
-
-    output = {
-        "ultima_actualizacion": timestamp,
-        "jurisdiccion": "La Rioja, Argentina",
-        "runtime_actions": "Node 24 + Python 3.12",
-        "total_sitios_activos": len(active_sites),
-        "total_notas": len(final_notas),
+    contenidos_vinculados = construir_contenidos_vinculados(todas_notas, taxonomias)
+    salida = {
+        "version": "3.1.0-monitor-v3.1-larioja",
+        "generado_utc": datetime.now(timezone.utc).isoformat(),
+        "jurisdiccion": config.get("jurisdiccion", "Provincia de La Rioja, Argentina"),
+        "total_fuentes_activas": len(sitios),
+        "total_noticias": len(todas_notas),
+        "noticias": todas_notas,
         "contenidos_vinculados": contenidos_vinculados,
-        "notas": final_notas,
     }
 
+    os.makedirs(os.path.dirname(NOTICIAS_PATH), exist_ok=True)
     with open(NOTICIAS_PATH, "w", encoding="utf-8") as f:
-        json.dump(output, f, ensure_ascii=False, indent=2)
+        json.dump(salida, f, ensure_ascii=False, indent=2)
 
-    print(f"MonitorV3.1 completado: {len(final_notas)} notas, {len(contenidos_vinculados)} síntesis.")
+    print(f"Completado en {time.time() - t0:.2f}s -> {len(todas_notas)} notas y {len(contenidos_vinculados)} vinculos.")
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())
